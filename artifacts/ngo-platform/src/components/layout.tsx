@@ -23,7 +23,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
             <div className="w-8 h-8 rounded-lg bg-primary flex items-center justify-center text-primary-foreground">
               <Heart className="w-5 h-5 group-hover:scale-110 transition-transform" />
             </div>
-            <span className="font-display font-bold text-xl tracking-tight text-primary">Sahaya Andhra</span>
+            <span className="font-display font-bold text-xl tracking-tight text-primary">Abhaya</span>
           </Link>
 
           {/* Desktop Nav */}
@@ -100,7 +100,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
                 <div className="w-8 h-8 rounded-lg bg-primary flex items-center justify-center text-primary-foreground">
                   <Heart className="w-5 h-5" />
                 </div>
-                <span className="font-display font-bold text-xl tracking-tight text-primary">Sahaya Andhra</span>
+                <span className="font-display font-bold text-xl tracking-tight text-primary">Abhaya</span>
               </Link>
               <p className="text-muted-foreground max-w-sm text-sm leading-relaxed">
                 A public welfare platform serving Andhra Pradesh. Connecting donors, organizations, and people in need with trust and transparency.
@@ -125,7 +125,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
             </div>
           </div>
           <div className="mt-12 pt-8 border-t border-border text-center text-sm text-muted-foreground">
-            <p>&copy; {new Date().getFullYear()} Sahaya Andhra. For the people of Andhra Pradesh.</p>
+            <p>&copy; {new Date().getFullYear()} Abhaya. For the people of Andhra Pradesh.</p>
           </div>
         </div>
       </footer>

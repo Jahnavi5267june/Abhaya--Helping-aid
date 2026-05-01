@@ -151,7 +151,7 @@ export default function Impact() {
             </div>
           </div>
           <div className="mt-8 p-4 bg-muted/30 rounded-xl border border-dashed text-sm text-center text-muted-foreground">
-            These statistics represent the collective effort of all Sahaya Andhra users and partner organizations. Data is updated in real-time.
+            These statistics represent the collective effort of all Abhaya users and partner organizations. Data is updated in real-time.
           </div>
         </div>
       </div>

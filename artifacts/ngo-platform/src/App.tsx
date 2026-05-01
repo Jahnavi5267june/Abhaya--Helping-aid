@@ -13,25 +13,31 @@ import HelpRequest from "@/pages/help";
 import Transparency from "@/pages/transparency";
 import DisasterRelief from "@/pages/disaster";
 import Impact from "@/pages/impact";
+import AdminPanel from "@/pages/admin";
 import NotFound from "@/pages/not-found";
 
 const queryClient = new QueryClient();
 
 function Router() {
   return (
-    <Layout>
-      <Switch>
-        <Route path="/" component={Home} />
-        <Route path="/organizations" component={Organizations} />
-        <Route path="/organizations/:id" component={OrganizationDetail} />
-        <Route path="/donate" component={Donate} />
-        <Route path="/help" component={HelpRequest} />
-        <Route path="/transparency" component={Transparency} />
-        <Route path="/disaster" component={DisasterRelief} />
-        <Route path="/impact" component={Impact} />
-        <Route component={NotFound} />
-      </Switch>
-    </Layout>
+    <Switch>
+      <Route path="/admin" component={AdminPanel} />
+      <Route>
+        <Layout>
+          <Switch>
+            <Route path="/" component={Home} />
+            <Route path="/organizations" component={Organizations} />
+            <Route path="/organizations/:id" component={OrganizationDetail} />
+            <Route path="/donate" component={Donate} />
+            <Route path="/help" component={HelpRequest} />
+            <Route path="/transparency" component={Transparency} />
+            <Route path="/disaster" component={DisasterRelief} />
+            <Route path="/impact" component={Impact} />
+            <Route component={NotFound} />
+          </Switch>
+        </Layout>
+      </Route>
+    </Switch>
   );
 }
 

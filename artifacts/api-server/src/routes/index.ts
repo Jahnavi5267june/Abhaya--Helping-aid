@@ -6,6 +6,7 @@ import helpRequestsRouter from "./help_requests";
 import documentsRouter from "./documents";
 import disasterReliefRouter from "./disaster_relief";
 import statsRouter from "./stats";
+import adminRouter from "./admin";
 
 const router: IRouter = Router();
 
@@ -16,5 +17,6 @@ router.use("/help-requests", helpRequestsRouter);
 router.use("/documents", documentsRouter);
 router.use("/disaster-relief", disasterReliefRouter);
 router.use("/stats", statsRouter);
+router.use("/admin", adminRouter);
 
 export default router;

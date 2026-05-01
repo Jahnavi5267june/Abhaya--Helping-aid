@@ -81,4 +81,19 @@ All routes under `/api`:
 - The `lib/api-spec/package.json` codegen script patches `lib/api-zod/src/index.ts` after orval runs to fix a name collision between generated Zod schemas and TypeScript types
 - App name: "Sahaya Andhra" (Sahaya = "help" in Telugu)
 
+## Admin Panel
+
+Accessible at `/admin`. Password-protected with a simple token-based system.
+
+- **Default password**: `abhaya-admin-2024`  
+- Can be overridden via the `ADMIN_PASSWORD` environment variable
+- Token is stored in `localStorage`
+
+Admin capabilities:
+- **Organizations**: verify/unverify, delete
+- **Donations**: change status (pending → confirmed → delivered), delete
+- **Help Requests**: change status (pending → in_progress → resolved), delete
+- **Documents**: delete
+- **Disaster Relief**: change campaign status (upcoming / active / closed)
+
 See the `pnpm-workspace` skill for workspace structure, TypeScript setup, and package details.

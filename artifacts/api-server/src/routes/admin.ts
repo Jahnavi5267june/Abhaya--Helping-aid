@@ -1,5 +1,5 @@
 import { Router } from "express";
-import { db, organizationsTable, donationsTable, helpRequestsTable, documentsTable, disasterReliefTable, communityAlertsTable } from "@workspace/db";
+import { db, organizationsTable, donationsTable, helpRequestsTable, documentsTable, disasterReliefTable, communityAlertsTable, disasterReportsTable, volunteersTable, orgRegistrationsTable } from "@workspace/db";
 import { eq } from "drizzle-orm";
 import { z } from "zod";
 
@@ -173,6 +173,75 @@ router.delete("/community-alerts/:id", requireAdmin, async (req, res) => {
     res.json({ success: true });
   } catch (err) {
     req.log.error({ err }, "Failed to delete community alert");
+    res.status(500).json({ error: "Failed" });
+  }
+});
+
+router.patch("/disaster-reports/:id/status", requireAdmin, async (req, res) => {
+  try {
+    const id = Number(req.params.id);
+    const { status } = z.object({ status: z.enum(["reported", "verified", "responding", "resolved"]) }).parse(req.body);
+    const [report] = await db.update(disasterReportsTable).set({ status }).where(eq(disasterReportsTable.id, id)).returning();
+    if (!report) { res.status(404).json({ error: "Not found" }); return; }
+    res.json({ ...report, createdAt: report.createdAt.toISOString() });
+  } catch (err) {
+    req.log.error({ err }, "Failed to update disaster report");
+    res.status(400).json({ error: "Invalid request" });
+  }
+});
+
+router.delete("/disaster-reports/:id", requireAdmin, async (req, res) => {
+  try {
+    await db.delete(disasterReportsTable).where(eq(disasterReportsTable.id, Number(req.params.id)));
+    res.json({ success: true });
+  } catch (err) {
+    req.log.error({ err }, "Failed to delete disaster report");
+    res.status(500).json({ error: "Failed" });
+  }
+});
+
+router.patch("/volunteers/:id/status", requireAdmin, async (req, res) => {
+  try {
+    const id = Number(req.params.id);
+    const { status } = z.object({ status: z.string() }).parse(req.body);
+    const [vol] = await db.update(volunteersTable).set({ status }).where(eq(volunteersTable.id, id)).returning();
+    if (!vol) { res.status(404).json({ error: "Not found" }); return; }
+    res.json({ ...vol, createdAt: vol.createdAt.toISOString() });
+  } catch (err) {
+    req.log.error({ err }, "Failed to update volunteer");
+    res.status(400).json({ error: "Invalid request" });
+  }
+});
+
+router.delete("/volunteers/:id", requireAdmin, async (req, res) => {
+  try {
+    await db.delete(volunteersTable).where(eq(volunteersTable.id, Number(req.params.id)));
+    res.json({ success: true });
+  } catch (err) {
+    req.log.error({ err }, "Failed to delete volunteer");
+    res.status(500).json({ error: "Failed" });
+  }
+});
+
+router.patch("/org-registrations/:id/status", requireAdmin, async (req, res) => {
+  try {
+    const id = Number(req.params.id);
+    const { status } = z.object({ status: z.enum(["pending", "approved", "rejected"]) }).parse(req.body);
+    const [reg] = await db.update(orgRegistrationsTable).set({ status }).where(eq(orgRegistrationsTable.id, id)).returning();
+    if (!reg) { res.status(404).json({ error: "Not found" }); return; }
+    res.json({ ...reg, createdAt: reg.createdAt.toISOString() });
+  } catch (err) {
+    req.log.error({ err }, "Failed to update org registration");
+    res.status(400).json({ error: "Invalid request" });
+  }
+});
+
+router.delete("/org-registrations/:id", requireAdmin, async (req, res) => {
+  try {
+    await db.delete(orgRegistrationsTable).where(eq(orgRegistrationsTable.id, Number(req.params.id)));
+    res.json({ success: true });
+  } catch (err) {
+    req.log.error({ err }, "Failed to delete org registration");
     res.status(500).json({ error: "Failed" });
   }
 });

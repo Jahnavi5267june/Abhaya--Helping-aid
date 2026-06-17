@@ -13,6 +13,8 @@ export const helpRequestsTable = pgTable("help_requests", {
   description: text("description").notNull(),
   urgency: text("urgency").notNull(),
   status: text("status").default("pending").notNull(),
+  photoUrl: text("photo_url"),
+  validationStatus: text("validation_status").default("unverified").notNull(),
   createdAt: timestamp("created_at").defaultNow().notNull(),
 });
 

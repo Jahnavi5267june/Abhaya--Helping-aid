@@ -12,8 +12,11 @@ import Donate from "@/pages/donate";
 import HelpRequest from "@/pages/help";
 import Transparency from "@/pages/transparency";
 import DisasterRelief from "@/pages/disaster";
+import DisasterReports from "@/pages/disaster-reports";
 import Impact from "@/pages/impact";
 import Community from "@/pages/community";
+import Volunteers from "@/pages/volunteers";
+import RegisterOrg from "@/pages/register-org";
 import AdminPanel from "@/pages/admin";
 import NotFound from "@/pages/not-found";
 
@@ -35,6 +38,9 @@ function Router() {
             <Route path="/disaster" component={DisasterRelief} />
             <Route path="/impact" component={Impact} />
             <Route path="/community" component={Community} />
+            <Route path="/disaster-reports" component={DisasterReports} />
+            <Route path="/volunteers" component={Volunteers} />
+            <Route path="/register-org" component={RegisterOrg} />
             <Route component={NotFound} />
           </Switch>
         </Layout>

@@ -152,6 +152,15 @@ export const HelpRequestStatus = {
   resolved: "resolved",
 } as const;
 
+export type HelpRequestValidationStatus =
+  (typeof HelpRequestValidationStatus)[keyof typeof HelpRequestValidationStatus];
+
+export const HelpRequestValidationStatus = {
+  unverified: "unverified",
+  volunteer_verified: "volunteer_verified",
+  admin_verified: "admin_verified",
+} as const;
+
 export interface HelpRequest {
   id: number;
   name: string;
@@ -163,6 +172,8 @@ export interface HelpRequest {
   description: string;
   urgency: HelpRequestUrgency;
   status: HelpRequestStatus;
+  photoUrl?: string;
+  validationStatus: HelpRequestValidationStatus;
   createdAt: string;
 }
 
@@ -199,6 +210,7 @@ export interface CreateHelpRequestBody {
   category: CreateHelpRequestBodyCategory;
   description: string;
   urgency: CreateHelpRequestBodyUrgency;
+  photoUrl?: string;
 }
 
 export type DocumentCategory =
@@ -410,6 +422,194 @@ export interface DonationTypeStat {
   percentage: number;
 }
 
+export type DisasterReportDisasterType =
+  (typeof DisasterReportDisasterType)[keyof typeof DisasterReportDisasterType];
+
+export const DisasterReportDisasterType = {
+  flood: "flood",
+  drought: "drought",
+  cyclone: "cyclone",
+  earthquake: "earthquake",
+  fire: "fire",
+  accident: "accident",
+  landslide: "landslide",
+  other: "other",
+} as const;
+
+export type DisasterReportSeverity =
+  (typeof DisasterReportSeverity)[keyof typeof DisasterReportSeverity];
+
+export const DisasterReportSeverity = {
+  low: "low",
+  medium: "medium",
+  high: "high",
+  critical: "critical",
+} as const;
+
+export type DisasterReportStatus =
+  (typeof DisasterReportStatus)[keyof typeof DisasterReportStatus];
+
+export const DisasterReportStatus = {
+  reported: "reported",
+  verified: "verified",
+  responding: "responding",
+  resolved: "resolved",
+} as const;
+
+export interface DisasterReport {
+  id: number;
+  title: string;
+  description: string;
+  disasterType: DisasterReportDisasterType;
+  location: string;
+  district: string;
+  severity: DisasterReportSeverity;
+  status: DisasterReportStatus;
+  photoUrl?: string;
+  reporterName: string;
+  reporterPhone: string;
+  reporterEmail?: string;
+  affectedCount?: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export type CreateDisasterReportBodyDisasterType =
+  (typeof CreateDisasterReportBodyDisasterType)[keyof typeof CreateDisasterReportBodyDisasterType];
+
+export const CreateDisasterReportBodyDisasterType = {
+  flood: "flood",
+  drought: "drought",
+  cyclone: "cyclone",
+  earthquake: "earthquake",
+  fire: "fire",
+  accident: "accident",
+  landslide: "landslide",
+  other: "other",
+} as const;
+
+export type CreateDisasterReportBodySeverity =
+  (typeof CreateDisasterReportBodySeverity)[keyof typeof CreateDisasterReportBodySeverity];
+
+export const CreateDisasterReportBodySeverity = {
+  low: "low",
+  medium: "medium",
+  high: "high",
+  critical: "critical",
+} as const;
+
+export interface CreateDisasterReportBody {
+  title: string;
+  description: string;
+  disasterType: CreateDisasterReportBodyDisasterType;
+  location: string;
+  district: string;
+  severity: CreateDisasterReportBodySeverity;
+  photoUrl?: string;
+  reporterName: string;
+  reporterPhone: string;
+  reporterEmail?: string;
+  affectedCount?: string;
+}
+
+export interface Volunteer {
+  id: number;
+  name: string;
+  phone: string;
+  email?: string;
+  district: string;
+  skills: string;
+  availability: string;
+  status: string;
+  createdAt: string;
+}
+
+export interface CreateVolunteerBody {
+  name: string;
+  phone: string;
+  email?: string;
+  district: string;
+  skills: string;
+  availability?: string;
+  aadhaarRef?: string;
+}
+
+export type OrgRegistrationType =
+  (typeof OrgRegistrationType)[keyof typeof OrgRegistrationType];
+
+export const OrgRegistrationType = {
+  old_age_home: "old_age_home",
+  orphanage: "orphanage",
+  other: "other",
+} as const;
+
+export type OrgRegistrationStatus =
+  (typeof OrgRegistrationStatus)[keyof typeof OrgRegistrationStatus];
+
+export const OrgRegistrationStatus = {
+  pending: "pending",
+  approved: "approved",
+  rejected: "rejected",
+} as const;
+
+export interface OrgRegistration {
+  id: number;
+  name: string;
+  type: OrgRegistrationType;
+  district: string;
+  address: string;
+  phone: string;
+  email: string;
+  contactPerson: string;
+  registrationNumber?: string;
+  description?: string;
+  capacity?: string;
+  documentUrl?: string;
+  status: OrgRegistrationStatus;
+  createdAt: string;
+}
+
+export type CreateOrgRegistrationBodyType =
+  (typeof CreateOrgRegistrationBodyType)[keyof typeof CreateOrgRegistrationBodyType];
+
+export const CreateOrgRegistrationBodyType = {
+  old_age_home: "old_age_home",
+  orphanage: "orphanage",
+  other: "other",
+} as const;
+
+export interface CreateOrgRegistrationBody {
+  name: string;
+  type: CreateOrgRegistrationBodyType;
+  district: string;
+  address: string;
+  phone: string;
+  email: string;
+  contactPerson: string;
+  registrationNumber?: string;
+  description?: string;
+  capacity?: string;
+  documentUrl?: string;
+}
+
+export interface UploadUrlRequest {
+  /** @minLength 1 */
+  name: string;
+  /** @minimum 1 */
+  size: number;
+  /** @minLength 1 */
+  contentType: string;
+}
+
+export interface UploadUrlResponse {
+  uploadURL: string;
+  objectPath: string;
+}
+
+export interface ErrorEnvelope {
+  error: string;
+}
+
 export type ListOrganizationsParams = {
   type?: ListOrganizationsType;
   district?: string;
@@ -498,3 +698,18 @@ export const ListCommunityAlertsStatus = {
   fulfilled: "fulfilled",
   closed: "closed",
 } as const;
+
+export type ListDisasterReportsParams = {
+  district?: string;
+  type?: string;
+  status?: string;
+};
+
+export type ListVolunteersParams = {
+  district?: string;
+  skills?: string;
+};
+
+export type ListOrgRegistrationsParams = {
+  status?: string;
+};

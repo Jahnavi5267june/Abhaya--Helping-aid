@@ -80,3 +80,27 @@ export async function patchCommunityAlert(id: number, status: string) {
 export async function deleteCommunityAlert(id: number) {
   return adminFetch(`/community-alerts/${id}`, { method: "DELETE" });
 }
+
+export async function patchDisasterReport(id: number, status: string) {
+  return adminFetch(`/disaster-reports/${id}/status`, { method: "PATCH", body: JSON.stringify({ status }) });
+}
+
+export async function patchVolunteer(id: number, status: string) {
+  return adminFetch(`/volunteers/${id}/status`, { method: "PATCH", body: JSON.stringify({ status }) });
+}
+
+export async function patchOrgRegistration(id: number, status: string) {
+  return adminFetch(`/org-registrations/${id}/status`, { method: "PATCH", body: JSON.stringify({ status }) });
+}
+
+export async function deleteVolunteer(id: number) {
+  return adminFetch(`/volunteers/${id}`, { method: "DELETE" });
+}
+
+export async function deleteOrgRegistration(id: number) {
+  return adminFetch(`/org-registrations/${id}`, { method: "DELETE" });
+}
+
+export async function deleteDisasterReport(id: number) {
+  return adminFetch(`/disaster-reports/${id}`, { method: "DELETE" });
+}

@@ -1,10 +1,11 @@
+import { useState } from "react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import * as z from "zod";
 import { useCreateHelpRequest } from "@workspace/api-client-react";
 import { useToast } from "@/hooks/use-toast";
 import { useLocation } from "wouter";
-import { AlertCircle, Loader2, Users } from "lucide-react";
+import { AlertCircle, Camera, Loader2, Users } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage, FormDescription } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
@@ -30,6 +31,29 @@ export default function HelpRequest() {
   const { toast } = useToast();
   const [, setLocation] = useLocation();
   const createHelpRequest = useCreateHelpRequest();
+  const [photoUrl, setPhotoUrl] = useState<string | undefined>();
+  const [uploading, setUploading] = useState(false);
+
+  async function handleFileChange(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setUploading(true);
+    try {
+      const res = await fetch("/api/storage/uploads/request-url", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ name: file.name, size: file.size, contentType: file.type }),
+      });
+      const { uploadURL, objectPath } = await res.json();
+      await fetch(uploadURL, { method: "PUT", body: file, headers: { "Content-Type": file.type } });
+      setPhotoUrl(objectPath);
+      toast({ title: "Photo uploaded", description: "Attached to your help request." });
+    } catch {
+      toast({ title: "Upload failed", description: "Could not upload photo.", variant: "destructive" });
+    } finally {
+      setUploading(false);
+    }
+  }
 
   const form = useForm<HelpFormValues>({
     resolver: zodResolver(helpSchema),
@@ -41,7 +65,7 @@ export default function HelpRequest() {
 
   const onSubmit = (data: HelpFormValues) => {
     createHelpRequest.mutate(
-      { data },
+      { data: { ...data, photoUrl } },
       {
         onSuccess: () => {
           toast({
@@ -207,6 +231,20 @@ export default function HelpRequest() {
                       <FormMessage />
                     </FormItem>
                   )} />
+                </div>
+              </div>
+
+              <div className="space-y-2 pt-4">
+                <h3 className="font-semibold text-lg border-b pb-2">Supporting Photo (Optional)</h3>
+                <div className="border-2 border-dashed border-border rounded-lg p-4 text-center">
+                  <Camera className="w-7 h-7 mx-auto mb-2 text-muted-foreground" />
+                  <p className="text-sm text-muted-foreground mb-3">Attaching a photo helps volunteers and admins understand the situation better.</p>
+                  <label className="cursor-pointer">
+                    <span className="text-sm bg-secondary text-secondary-foreground px-4 py-2 rounded-md hover:bg-secondary/80 transition-colors">
+                      {uploading ? "Uploading..." : photoUrl ? "✓ Photo attached" : "Choose Photo"}
+                    </span>
+                    <input type="file" accept="image/*" className="hidden" onChange={handleFileChange} disabled={uploading} />
+                  </label>
                 </div>
               </div>
 

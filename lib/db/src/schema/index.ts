@@ -4,3 +4,6 @@ export * from "./help_requests";
 export * from "./documents";
 export * from "./disaster_relief";
 export * from "./community_alerts";
+export * from "./disaster_reports";
+export * from "./volunteers";
+export * from "./org_registrations";

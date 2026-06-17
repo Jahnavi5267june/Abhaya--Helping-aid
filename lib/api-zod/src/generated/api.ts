@@ -171,6 +171,12 @@ export const ListHelpRequestsResponseItem = zod.object({
   description: zod.string(),
   urgency: zod.enum(["low", "medium", "high", "critical"]),
   status: zod.enum(["pending", "in_progress", "resolved"]),
+  photoUrl: zod.string().optional(),
+  validationStatus: zod.enum([
+    "unverified",
+    "volunteer_verified",
+    "admin_verified",
+  ]),
   createdAt: zod.string(),
 });
 export const ListHelpRequestsResponse = zod.array(ListHelpRequestsResponseItem);
@@ -196,6 +202,7 @@ export const CreateHelpRequestBody = zod.object({
   ]),
   description: zod.string(),
   urgency: zod.enum(["low", "medium", "high", "critical"]),
+  photoUrl: zod.string().optional(),
 });
 
 /**
@@ -408,3 +415,175 @@ export const GetDonationsByTypeResponseItem = zod.object({
 export const GetDonationsByTypeResponse = zod.array(
   GetDonationsByTypeResponseItem,
 );
+
+/**
+ * @summary List community-reported disasters
+ */
+export const ListDisasterReportsQueryParams = zod.object({
+  district: zod.coerce.string().optional(),
+  type: zod.coerce.string().optional(),
+  status: zod.coerce.string().optional(),
+});
+
+export const ListDisasterReportsResponseItem = zod.object({
+  id: zod.number(),
+  title: zod.string(),
+  description: zod.string(),
+  disasterType: zod.enum([
+    "flood",
+    "drought",
+    "cyclone",
+    "earthquake",
+    "fire",
+    "accident",
+    "landslide",
+    "other",
+  ]),
+  location: zod.string(),
+  district: zod.string(),
+  severity: zod.enum(["low", "medium", "high", "critical"]),
+  status: zod.enum(["reported", "verified", "responding", "resolved"]),
+  photoUrl: zod.string().optional(),
+  reporterName: zod.string(),
+  reporterPhone: zod.string(),
+  reporterEmail: zod.string().optional(),
+  affectedCount: zod.string().optional(),
+  createdAt: zod.string(),
+  updatedAt: zod.string(),
+});
+export const ListDisasterReportsResponse = zod.array(
+  ListDisasterReportsResponseItem,
+);
+
+/**
+ * @summary Submit a community disaster report
+ */
+export const CreateDisasterReportBody = zod.object({
+  title: zod.string(),
+  description: zod.string(),
+  disasterType: zod.enum([
+    "flood",
+    "drought",
+    "cyclone",
+    "earthquake",
+    "fire",
+    "accident",
+    "landslide",
+    "other",
+  ]),
+  location: zod.string(),
+  district: zod.string(),
+  severity: zod.enum(["low", "medium", "high", "critical"]),
+  photoUrl: zod.string().optional(),
+  reporterName: zod.string(),
+  reporterPhone: zod.string(),
+  reporterEmail: zod.string().optional(),
+  affectedCount: zod.string().optional(),
+});
+
+/**
+ * @summary List registered volunteers
+ */
+export const ListVolunteersQueryParams = zod.object({
+  district: zod.coerce.string().optional(),
+  skills: zod.coerce.string().optional(),
+});
+
+export const ListVolunteersResponseItem = zod.object({
+  id: zod.number(),
+  name: zod.string(),
+  phone: zod.string(),
+  email: zod.string().optional(),
+  district: zod.string(),
+  skills: zod.string(),
+  availability: zod.string(),
+  status: zod.string(),
+  createdAt: zod.string(),
+});
+export const ListVolunteersResponse = zod.array(ListVolunteersResponseItem);
+
+/**
+ * @summary Register as a volunteer
+ */
+export const CreateVolunteerBody = zod.object({
+  name: zod.string(),
+  phone: zod.string(),
+  email: zod.string().optional(),
+  district: zod.string(),
+  skills: zod.string(),
+  availability: zod.string().optional(),
+  aadhaarRef: zod.string().optional(),
+});
+
+/**
+ * @summary List organization registration requests (admin)
+ */
+export const ListOrgRegistrationsQueryParams = zod.object({
+  status: zod.coerce.string().optional(),
+});
+
+export const ListOrgRegistrationsResponseItem = zod.object({
+  id: zod.number(),
+  name: zod.string(),
+  type: zod.enum(["old_age_home", "orphanage", "other"]),
+  district: zod.string(),
+  address: zod.string(),
+  phone: zod.string(),
+  email: zod.string(),
+  contactPerson: zod.string(),
+  registrationNumber: zod.string().optional(),
+  description: zod.string().optional(),
+  capacity: zod.string().optional(),
+  documentUrl: zod.string().optional(),
+  status: zod.enum(["pending", "approved", "rejected"]),
+  createdAt: zod.string(),
+});
+export const ListOrgRegistrationsResponse = zod.array(
+  ListOrgRegistrationsResponseItem,
+);
+
+/**
+ * @summary Submit organization registration request
+ */
+export const CreateOrgRegistrationBody = zod.object({
+  name: zod.string(),
+  type: zod.enum(["old_age_home", "orphanage", "other"]),
+  district: zod.string(),
+  address: zod.string(),
+  phone: zod.string(),
+  email: zod.string(),
+  contactPerson: zod.string(),
+  registrationNumber: zod.string().optional(),
+  description: zod.string().optional(),
+  capacity: zod.string().optional(),
+  documentUrl: zod.string().optional(),
+});
+
+/**
+ * @summary Request a presigned URL for file upload
+ */
+
+export const RequestUploadUrlBody = zod.object({
+  name: zod.string().min(1),
+  size: zod.number().min(1),
+  contentType: zod.string().min(1),
+});
+
+export const RequestUploadUrlResponse = zod.object({
+  uploadURL: zod.string().url(),
+  objectPath: zod.string(),
+});
+
+/**
+ * @summary Serve an uploaded object
+ */
+export const GetStorageObjectParams = zod.object({
+  objectPath: zod.coerce.string(),
+});
+
+/**
+ * @summary Serve a public asset
+ */
+export const GetPublicObjectParams = zod.object({
+  filePath: zod.coerce.string(),
+});

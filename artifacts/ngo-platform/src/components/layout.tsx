@@ -8,6 +8,7 @@ const NAV_LINKS = [
   { href: "/organizations", label: "Organizations", icon: Search },
   { href: "/community", label: "Community", icon: Users },
   { href: "/disaster", label: "Disaster Relief", icon: Activity },
+  { href: "/volunteers", label: "Volunteers", icon: Users },
   { href: "/transparency", label: "Transparency", icon: Shield },
   { href: "/impact", label: "Impact", icon: BarChart3 },
 ];
@@ -126,6 +127,9 @@ export function Layout({ children }: { children: React.ReactNode }) {
                 <li><Link href="/organizations" className="hover:text-primary transition-colors">Organizations Directory</Link></li>
                 <li><Link href="/community" className="hover:text-purple-600 transition-colors">Community Help Board</Link></li>
                 <li><Link href="/disaster" className="hover:text-primary transition-colors">Disaster Relief</Link></li>
+                <li><Link href="/disaster-reports" className="hover:text-orange-600 transition-colors">Disaster Reports</Link></li>
+                <li><Link href="/volunteers" className="hover:text-green-600 transition-colors">Volunteer Network</Link></li>
+                <li><Link href="/register-org" className="hover:text-blue-600 transition-colors">Register Organization</Link></li>
                 <li><Link href="/help" className="hover:text-primary transition-colors">Request Help</Link></li>
                 <li><Link href="/donate" className="hover:text-primary transition-colors">Donate</Link></li>
               </ul>

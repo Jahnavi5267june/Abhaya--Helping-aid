@@ -17,6 +17,9 @@ import {
   useListDocuments, getListDocumentsQueryKey,
   useListDisasterRelief, getListDisasterReliefQueryKey,
   useListCommunityAlerts, getListCommunityAlertsQueryKey,
+  useListDisasterReports, getListDisasterReportsQueryKey,
+  useListVolunteers, getListVolunteersQueryKey,
+  useListOrgRegistrations, getListOrgRegistrationsQueryKey,
   useGetStatsOverview, getGetStatsOverviewQueryKey,
 } from "@workspace/api-client-react";
 import {
@@ -26,6 +29,9 @@ import {
   patchHelpRequest, deleteHelpRequest,
   patchDisasterRelief, deleteDocument,
   patchCommunityAlert, deleteCommunityAlert,
+  patchDisasterReport, deleteDisasterReport,
+  patchVolunteer, deleteVolunteer,
+  patchOrgRegistration, deleteOrgRegistration,
 } from "@/lib/admin-api";
 
 function LoginScreen({ onLogin }: { onLogin: () => void }) {
@@ -151,47 +157,26 @@ export default function AdminPanel() {
           <TabsList className="mb-6 flex-wrap h-auto gap-1">
             <TabsTrigger value="overview" data-testid="tab-overview"><LayoutDashboard className="w-4 h-4 mr-1" />Overview</TabsTrigger>
             <TabsTrigger value="organizations" data-testid="tab-organizations"><Building2 className="w-4 h-4 mr-1" />Organizations</TabsTrigger>
+            <TabsTrigger value="org-registrations" data-testid="tab-org-registrations"><Building2 className="w-4 h-4 mr-1" />Org Requests</TabsTrigger>
             <TabsTrigger value="donations" data-testid="tab-donations"><HandHeart className="w-4 h-4 mr-1" />Donations</TabsTrigger>
             <TabsTrigger value="help-requests" data-testid="tab-help-requests"><HelpCircle className="w-4 h-4 mr-1" />Help Requests</TabsTrigger>
+            <TabsTrigger value="volunteers" data-testid="tab-volunteers"><Users className="w-4 h-4 mr-1" />Volunteers</TabsTrigger>
             <TabsTrigger value="community" data-testid="tab-community"><Users className="w-4 h-4 mr-1" />Community Alerts</TabsTrigger>
+            <TabsTrigger value="disaster-reports" data-testid="tab-disaster-reports"><AlertTriangle className="w-4 h-4 mr-1" />Disaster Reports</TabsTrigger>
             <TabsTrigger value="documents" data-testid="tab-documents"><FileText className="w-4 h-4 mr-1" />Documents</TabsTrigger>
-            <TabsTrigger value="disaster" data-testid="tab-disaster"><Siren className="w-4 h-4 mr-1" />Disaster Relief</TabsTrigger>
+            <TabsTrigger value="disaster" data-testid="tab-disaster"><Siren className="w-4 h-4 mr-1" />Relief Campaigns</TabsTrigger>
           </TabsList>
 
-          {/* OVERVIEW */}
-          <TabsContent value="overview">
-            <OverviewTab />
-          </TabsContent>
-
-          {/* ORGANIZATIONS */}
-          <TabsContent value="organizations">
-            <OrganizationsTab qc={qc} toast={toast} />
-          </TabsContent>
-
-          {/* DONATIONS */}
-          <TabsContent value="donations">
-            <DonationsTab qc={qc} toast={toast} />
-          </TabsContent>
-
-          {/* HELP REQUESTS */}
-          <TabsContent value="help-requests">
-            <HelpRequestsTab qc={qc} toast={toast} />
-          </TabsContent>
-
-          {/* COMMUNITY ALERTS */}
-          <TabsContent value="community">
-            <CommunityAlertsTab qc={qc} toast={toast} />
-          </TabsContent>
-
-          {/* DOCUMENTS */}
-          <TabsContent value="documents">
-            <DocumentsTab qc={qc} toast={toast} />
-          </TabsContent>
-
-          {/* DISASTER RELIEF */}
-          <TabsContent value="disaster">
-            <DisasterTab qc={qc} toast={toast} />
-          </TabsContent>
+          <TabsContent value="overview"><OverviewTab /></TabsContent>
+          <TabsContent value="organizations"><OrganizationsTab qc={qc} toast={toast} /></TabsContent>
+          <TabsContent value="org-registrations"><OrgRegistrationsTab qc={qc} toast={toast} /></TabsContent>
+          <TabsContent value="donations"><DonationsTab qc={qc} toast={toast} /></TabsContent>
+          <TabsContent value="help-requests"><HelpRequestsTab qc={qc} toast={toast} /></TabsContent>
+          <TabsContent value="volunteers"><VolunteersTab qc={qc} toast={toast} /></TabsContent>
+          <TabsContent value="community"><CommunityAlertsTab qc={qc} toast={toast} /></TabsContent>
+          <TabsContent value="disaster-reports"><DisasterReportsTab qc={qc} toast={toast} /></TabsContent>
+          <TabsContent value="documents"><DocumentsTab qc={qc} toast={toast} /></TabsContent>
+          <TabsContent value="disaster"><DisasterTab qc={qc} toast={toast} /></TabsContent>
         </Tabs>
       </div>
     </div>
@@ -604,6 +589,257 @@ function HelpRequestsTab({ qc, toast }: any) {
                 </TableCell>
                 <TableCell>
                   <Button variant="ghost" size="icon" className="h-7 w-7 text-destructive hover:text-destructive" onClick={() => handleDelete(r.id)} data-testid={`button-delete-help-${r.id}`}>
+                    <Trash2 className="w-4 h-4" />
+                  </Button>
+                </TableCell>
+              </TableRow>
+            ))}
+          </TableBody>
+        </Table>
+      </Card>
+    </div>
+  );
+}
+
+function OrgRegistrationsTab({ qc, toast }: any) {
+  const { data: regs, isLoading } = useListOrgRegistrations(undefined, { query: { queryKey: getListOrgRegistrationsQueryKey() } });
+
+  async function changeStatus(id: number, status: string) {
+    try {
+      await patchOrgRegistration(id, status);
+      qc.invalidateQueries({ queryKey: getListOrgRegistrationsQueryKey() });
+      toast({ title: `Registration ${status}` });
+    } catch {
+      toast({ title: "Failed to update", variant: "destructive" });
+    }
+  }
+
+  async function handleDelete(id: number) {
+    if (!confirm("Delete this registration request?")) return;
+    try {
+      await deleteOrgRegistration(id);
+      qc.invalidateQueries({ queryKey: getListOrgRegistrationsQueryKey() });
+      toast({ title: "Registration deleted" });
+    } catch {
+      toast({ title: "Failed to delete", variant: "destructive" });
+    }
+  }
+
+  return (
+    <div className="space-y-4">
+      <div>
+        <h2 className="text-lg font-semibold">Organization Registration Requests <span className="text-sm font-normal text-muted-foreground">({regs?.length ?? 0})</span></h2>
+        <p className="text-sm text-muted-foreground">Organizations that applied to join the platform. Approve to add them to the directory.</p>
+      </div>
+      <Card>
+        <Table>
+          <TableHeader>
+            <TableRow>
+              <TableHead>Organization</TableHead>
+              <TableHead>Type</TableHead>
+              <TableHead>District</TableHead>
+              <TableHead>Contact</TableHead>
+              <TableHead>Reg No.</TableHead>
+              <TableHead>Doc</TableHead>
+              <TableHead>Status</TableHead>
+              <TableHead className="w-12">Del</TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {isLoading ? (
+              Array.from({ length: 3 }).map((_, i) => <TableRow key={i}><TableCell colSpan={8}><Skeleton className="h-8 w-full" /></TableCell></TableRow>)
+            ) : regs?.length === 0 ? (
+              <TableRow><TableCell colSpan={8} className="text-center text-muted-foreground py-8">No registration requests</TableCell></TableRow>
+            ) : regs?.map((r) => (
+              <TableRow key={r.id}>
+                <TableCell>
+                  <div className="font-medium text-sm">{r.name}</div>
+                  <div className="text-xs text-muted-foreground">{r.email}</div>
+                </TableCell>
+                <TableCell><Badge variant="outline" className="text-xs capitalize">{r.type.replace(/_/g, " ")}</Badge></TableCell>
+                <TableCell className="text-sm text-muted-foreground">{r.district}</TableCell>
+                <TableCell>
+                  <div className="text-sm">{r.contactPerson}</div>
+                  <div className="text-xs text-muted-foreground">{r.phone}</div>
+                </TableCell>
+                <TableCell className="text-xs text-muted-foreground">{r.registrationNumber || "—"}</TableCell>
+                <TableCell>
+                  {r.documentUrl ? <a href={`/api/storage${r.documentUrl}`} target="_blank" rel="noopener noreferrer" className="text-xs text-primary underline">View</a> : <span className="text-xs text-muted-foreground">—</span>}
+                </TableCell>
+                <TableCell>
+                  <Select value={r.status} onValueChange={(v) => changeStatus(r.id, v)}>
+                    <SelectTrigger className="h-7 text-xs w-28"><SelectValue /></SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="pending">Pending</SelectItem>
+                      <SelectItem value="approved">Approved</SelectItem>
+                      <SelectItem value="rejected">Rejected</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </TableCell>
+                <TableCell>
+                  <Button variant="ghost" size="icon" className="h-7 w-7 text-destructive hover:text-destructive" onClick={() => handleDelete(r.id)}>
+                    <Trash2 className="w-4 h-4" />
+                  </Button>
+                </TableCell>
+              </TableRow>
+            ))}
+          </TableBody>
+        </Table>
+      </Card>
+    </div>
+  );
+}
+
+function VolunteersTab({ qc, toast }: any) {
+  const { data: volunteers, isLoading } = useListVolunteers(undefined, { query: { queryKey: getListVolunteersQueryKey() } });
+
+  async function handleDelete(id: number) {
+    if (!confirm("Remove this volunteer?")) return;
+    try {
+      await deleteVolunteer(id);
+      qc.invalidateQueries({ queryKey: getListVolunteersQueryKey() });
+      toast({ title: "Volunteer removed" });
+    } catch {
+      toast({ title: "Failed to delete", variant: "destructive" });
+    }
+  }
+
+  const availLabel: Record<string, string> = { anytime: "Anytime", weekends: "Weekends", weekdays: "Weekdays", emergencies_only: "Emergencies only" };
+
+  return (
+    <div className="space-y-4">
+      <div>
+        <h2 className="text-lg font-semibold">Volunteer Network <span className="text-sm font-normal text-muted-foreground">({volunteers?.length ?? 0})</span></h2>
+        <p className="text-sm text-muted-foreground">All registered volunteers. Contact them directly when help is needed in their district.</p>
+      </div>
+      <Card>
+        <Table>
+          <TableHeader>
+            <TableRow>
+              <TableHead>Name</TableHead>
+              <TableHead>District</TableHead>
+              <TableHead>Phone</TableHead>
+              <TableHead>Skills</TableHead>
+              <TableHead>Availability</TableHead>
+              <TableHead>Registered</TableHead>
+              <TableHead className="w-12">Del</TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {isLoading ? (
+              Array.from({ length: 4 }).map((_, i) => <TableRow key={i}><TableCell colSpan={7}><Skeleton className="h-8 w-full" /></TableCell></TableRow>)
+            ) : volunteers?.length === 0 ? (
+              <TableRow><TableCell colSpan={7} className="text-center text-muted-foreground py-8">No volunteers registered yet</TableCell></TableRow>
+            ) : volunteers?.map((v) => (
+              <TableRow key={v.id}>
+                <TableCell>
+                  <div className="font-medium text-sm">{v.name}</div>
+                  {v.email && <div className="text-xs text-muted-foreground">{v.email}</div>}
+                </TableCell>
+                <TableCell className="text-sm">{v.district}</TableCell>
+                <TableCell><a href={`tel:${v.phone}`} className="text-sm text-primary hover:underline">{v.phone}</a></TableCell>
+                <TableCell>
+                  <div className="text-xs text-muted-foreground max-w-40 truncate">{v.skills}</div>
+                </TableCell>
+                <TableCell className="text-sm">{availLabel[v.availability] || v.availability}</TableCell>
+                <TableCell className="text-xs text-muted-foreground">{new Date(v.createdAt).toLocaleDateString("en-IN")}</TableCell>
+                <TableCell>
+                  <Button variant="ghost" size="icon" className="h-7 w-7 text-destructive hover:text-destructive" onClick={() => handleDelete(v.id)}>
+                    <Trash2 className="w-4 h-4" />
+                  </Button>
+                </TableCell>
+              </TableRow>
+            ))}
+          </TableBody>
+        </Table>
+      </Card>
+    </div>
+  );
+}
+
+function DisasterReportsTab({ qc, toast }: any) {
+  const { data: reports, isLoading } = useListDisasterReports(undefined, { query: { queryKey: getListDisasterReportsQueryKey() } });
+
+  async function changeStatus(id: number, status: string) {
+    try {
+      await patchDisasterReport(id, status);
+      qc.invalidateQueries({ queryKey: getListDisasterReportsQueryKey() });
+      toast({ title: `Report updated to ${status}` });
+    } catch {
+      toast({ title: "Failed to update", variant: "destructive" });
+    }
+  }
+
+  async function handleDelete(id: number) {
+    if (!confirm("Delete this disaster report?")) return;
+    try {
+      await deleteDisasterReport(id);
+      qc.invalidateQueries({ queryKey: getListDisasterReportsQueryKey() });
+      toast({ title: "Report deleted" });
+    } catch {
+      toast({ title: "Failed to delete", variant: "destructive" });
+    }
+  }
+
+  const typeEmoji: Record<string, string> = { flood: "🌊", drought: "☀️", cyclone: "🌀", earthquake: "🏔", fire: "🔥", accident: "🚧", landslide: "⛰️", other: "⚠️" };
+  const sevColor = (s: string) => s === "critical" ? "bg-red-100 text-red-800" : s === "high" ? "bg-orange-100 text-orange-800" : s === "medium" ? "bg-yellow-100 text-yellow-800" : "bg-green-100 text-green-800";
+
+  return (
+    <div className="space-y-4">
+      <div>
+        <h2 className="text-lg font-semibold">Community Disaster Reports <span className="text-sm font-normal text-muted-foreground">({reports?.length ?? 0})</span></h2>
+        <p className="text-sm text-muted-foreground">Real-time reports from the community. Update status as situation progresses.</p>
+      </div>
+      <Card>
+        <Table>
+          <TableHeader>
+            <TableRow>
+              <TableHead>Report</TableHead>
+              <TableHead>Type</TableHead>
+              <TableHead>Location</TableHead>
+              <TableHead>Severity</TableHead>
+              <TableHead>Affected</TableHead>
+              <TableHead>Reporter</TableHead>
+              <TableHead>Photo</TableHead>
+              <TableHead>Status</TableHead>
+              <TableHead className="w-12">Del</TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {isLoading ? (
+              Array.from({ length: 3 }).map((_, i) => <TableRow key={i}><TableCell colSpan={9}><Skeleton className="h-8 w-full" /></TableCell></TableRow>)
+            ) : reports?.length === 0 ? (
+              <TableRow><TableCell colSpan={9} className="text-center text-muted-foreground py-8">No disaster reports yet</TableCell></TableRow>
+            ) : reports?.map((r) => (
+              <TableRow key={r.id}>
+                <TableCell>
+                  <div className="font-medium text-sm max-w-36 truncate">{r.title}</div>
+                  <div className="text-xs text-muted-foreground max-w-36 truncate">{r.description}</div>
+                </TableCell>
+                <TableCell><span className="text-lg">{typeEmoji[r.disasterType] || "⚠️"}</span> <span className="text-xs capitalize">{r.disasterType}</span></TableCell>
+                <TableCell className="text-xs text-muted-foreground">{r.location}, {r.district}</TableCell>
+                <TableCell><Badge className={`text-xs ${sevColor(r.severity)}`}>{r.severity}</Badge></TableCell>
+                <TableCell className="text-xs">{r.affectedCount || "—"}</TableCell>
+                <TableCell>
+                  <div className="text-sm">{r.reporterName}</div>
+                  <a href={`tel:${r.reporterPhone}`} className="text-xs text-primary hover:underline">{r.reporterPhone}</a>
+                </TableCell>
+                <TableCell>
+                  {r.photoUrl ? <a href={`/api/storage${r.photoUrl}`} target="_blank" rel="noopener noreferrer" className="text-xs text-primary underline">View</a> : <span className="text-xs text-muted-foreground">—</span>}
+                </TableCell>
+                <TableCell>
+                  <Select value={r.status} onValueChange={(v) => changeStatus(r.id, v)}>
+                    <SelectTrigger className="h-7 text-xs w-28"><SelectValue /></SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="reported">Reported</SelectItem>
+                      <SelectItem value="verified">Verified</SelectItem>
+                      <SelectItem value="responding">Responding</SelectItem>
+                      <SelectItem value="resolved">Resolved</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </TableCell>
+                <TableCell>
+                  <Button variant="ghost" size="icon" className="h-7 w-7 text-destructive hover:text-destructive" onClick={() => handleDelete(r.id)}>
                     <Trash2 className="w-4 h-4" />
                   </Button>
                 </TableCell>

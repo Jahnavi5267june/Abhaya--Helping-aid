@@ -21,24 +21,36 @@ import type {
   ContributeBody,
   CreateCommunityAlertBody,
   CreateDisasterReliefBody,
+  CreateDisasterReportBody,
   CreateDocumentBody,
   CreateDonationBody,
   CreateHelpRequestBody,
+  CreateOrgRegistrationBody,
   CreateOrganizationBody,
+  CreateVolunteerBody,
   DisasterRelief,
+  DisasterReport,
   Document,
   Donation,
   DonationTypeStat,
+  ErrorEnvelope,
   HealthStatus,
   HelpRequest,
   ListCommunityAlertsParams,
   ListDisasterReliefParams,
+  ListDisasterReportsParams,
   ListDocumentsParams,
   ListDonationsParams,
   ListHelpRequestsParams,
+  ListOrgRegistrationsParams,
   ListOrganizationsParams,
+  ListVolunteersParams,
+  OrgRegistration,
   Organization,
   StatsOverview,
+  UploadUrlRequest,
+  UploadUrlResponse,
+  Volunteer,
 } from "./api.schemas";
 
 import { customFetch } from "../custom-fetch";
@@ -1538,6 +1550,823 @@ export function useGetDonationsByType<
   request?: SecondParameter<typeof customFetch>;
 }): UseQueryResult<TData, TError> & { queryKey: QueryKey } {
   const queryOptions = getGetDonationsByTypeQueryOptions(options);
+
+  const query = useQuery(queryOptions) as UseQueryResult<TData, TError> & {
+    queryKey: QueryKey;
+  };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
+
+/**
+ * @summary List community-reported disasters
+ */
+export const getListDisasterReportsUrl = (
+  params?: ListDisasterReportsParams,
+) => {
+  const normalizedParams = new URLSearchParams();
+
+  Object.entries(params || {}).forEach(([key, value]) => {
+    if (value !== undefined) {
+      normalizedParams.append(key, value === null ? "null" : value.toString());
+    }
+  });
+
+  const stringifiedParams = normalizedParams.toString();
+
+  return stringifiedParams.length > 0
+    ? `/api/disaster-reports?${stringifiedParams}`
+    : `/api/disaster-reports`;
+};
+
+export const listDisasterReports = async (
+  params?: ListDisasterReportsParams,
+  options?: RequestInit,
+): Promise<DisasterReport[]> => {
+  return customFetch<DisasterReport[]>(getListDisasterReportsUrl(params), {
+    ...options,
+    method: "GET",
+  });
+};
+
+export const getListDisasterReportsQueryKey = (
+  params?: ListDisasterReportsParams,
+) => {
+  return [`/api/disaster-reports`, ...(params ? [params] : [])] as const;
+};
+
+export const getListDisasterReportsQueryOptions = <
+  TData = Awaited<ReturnType<typeof listDisasterReports>>,
+  TError = ErrorType<unknown>,
+>(
+  params?: ListDisasterReportsParams,
+  options?: {
+    query?: UseQueryOptions<
+      Awaited<ReturnType<typeof listDisasterReports>>,
+      TError,
+      TData
+    >;
+    request?: SecondParameter<typeof customFetch>;
+  },
+) => {
+  const { query: queryOptions, request: requestOptions } = options ?? {};
+
+  const queryKey =
+    queryOptions?.queryKey ?? getListDisasterReportsQueryKey(params);
+
+  const queryFn: QueryFunction<
+    Awaited<ReturnType<typeof listDisasterReports>>
+  > = ({ signal }) =>
+    listDisasterReports(params, { signal, ...requestOptions });
+
+  return { queryKey, queryFn, ...queryOptions } as UseQueryOptions<
+    Awaited<ReturnType<typeof listDisasterReports>>,
+    TError,
+    TData
+  > & { queryKey: QueryKey };
+};
+
+export type ListDisasterReportsQueryResult = NonNullable<
+  Awaited<ReturnType<typeof listDisasterReports>>
+>;
+export type ListDisasterReportsQueryError = ErrorType<unknown>;
+
+/**
+ * @summary List community-reported disasters
+ */
+
+export function useListDisasterReports<
+  TData = Awaited<ReturnType<typeof listDisasterReports>>,
+  TError = ErrorType<unknown>,
+>(
+  params?: ListDisasterReportsParams,
+  options?: {
+    query?: UseQueryOptions<
+      Awaited<ReturnType<typeof listDisasterReports>>,
+      TError,
+      TData
+    >;
+    request?: SecondParameter<typeof customFetch>;
+  },
+): UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+  const queryOptions = getListDisasterReportsQueryOptions(params, options);
+
+  const query = useQuery(queryOptions) as UseQueryResult<TData, TError> & {
+    queryKey: QueryKey;
+  };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
+
+/**
+ * @summary Submit a community disaster report
+ */
+export const getCreateDisasterReportUrl = () => {
+  return `/api/disaster-reports`;
+};
+
+export const createDisasterReport = async (
+  createDisasterReportBody: CreateDisasterReportBody,
+  options?: RequestInit,
+): Promise<DisasterReport> => {
+  return customFetch<DisasterReport>(getCreateDisasterReportUrl(), {
+    ...options,
+    method: "POST",
+    headers: { "Content-Type": "application/json", ...options?.headers },
+    body: JSON.stringify(createDisasterReportBody),
+  });
+};
+
+export const getCreateDisasterReportMutationOptions = <
+  TError = ErrorType<unknown>,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof createDisasterReport>>,
+    TError,
+    { data: BodyType<CreateDisasterReportBody> },
+    TContext
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseMutationOptions<
+  Awaited<ReturnType<typeof createDisasterReport>>,
+  TError,
+  { data: BodyType<CreateDisasterReportBody> },
+  TContext
+> => {
+  const mutationKey = ["createDisasterReport"];
+  const { mutation: mutationOptions, request: requestOptions } = options
+    ? options.mutation &&
+      "mutationKey" in options.mutation &&
+      options.mutation.mutationKey
+      ? options
+      : { ...options, mutation: { ...options.mutation, mutationKey } }
+    : { mutation: { mutationKey }, request: undefined };
+
+  const mutationFn: MutationFunction<
+    Awaited<ReturnType<typeof createDisasterReport>>,
+    { data: BodyType<CreateDisasterReportBody> }
+  > = (props) => {
+    const { data } = props ?? {};
+
+    return createDisasterReport(data, requestOptions);
+  };
+
+  return { mutationFn, ...mutationOptions };
+};
+
+export type CreateDisasterReportMutationResult = NonNullable<
+  Awaited<ReturnType<typeof createDisasterReport>>
+>;
+export type CreateDisasterReportMutationBody =
+  BodyType<CreateDisasterReportBody>;
+export type CreateDisasterReportMutationError = ErrorType<unknown>;
+
+/**
+ * @summary Submit a community disaster report
+ */
+export const useCreateDisasterReport = <
+  TError = ErrorType<unknown>,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof createDisasterReport>>,
+    TError,
+    { data: BodyType<CreateDisasterReportBody> },
+    TContext
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseMutationResult<
+  Awaited<ReturnType<typeof createDisasterReport>>,
+  TError,
+  { data: BodyType<CreateDisasterReportBody> },
+  TContext
+> => {
+  return useMutation(getCreateDisasterReportMutationOptions(options));
+};
+
+/**
+ * @summary List registered volunteers
+ */
+export const getListVolunteersUrl = (params?: ListVolunteersParams) => {
+  const normalizedParams = new URLSearchParams();
+
+  Object.entries(params || {}).forEach(([key, value]) => {
+    if (value !== undefined) {
+      normalizedParams.append(key, value === null ? "null" : value.toString());
+    }
+  });
+
+  const stringifiedParams = normalizedParams.toString();
+
+  return stringifiedParams.length > 0
+    ? `/api/volunteers?${stringifiedParams}`
+    : `/api/volunteers`;
+};
+
+export const listVolunteers = async (
+  params?: ListVolunteersParams,
+  options?: RequestInit,
+): Promise<Volunteer[]> => {
+  return customFetch<Volunteer[]>(getListVolunteersUrl(params), {
+    ...options,
+    method: "GET",
+  });
+};
+
+export const getListVolunteersQueryKey = (params?: ListVolunteersParams) => {
+  return [`/api/volunteers`, ...(params ? [params] : [])] as const;
+};
+
+export const getListVolunteersQueryOptions = <
+  TData = Awaited<ReturnType<typeof listVolunteers>>,
+  TError = ErrorType<unknown>,
+>(
+  params?: ListVolunteersParams,
+  options?: {
+    query?: UseQueryOptions<
+      Awaited<ReturnType<typeof listVolunteers>>,
+      TError,
+      TData
+    >;
+    request?: SecondParameter<typeof customFetch>;
+  },
+) => {
+  const { query: queryOptions, request: requestOptions } = options ?? {};
+
+  const queryKey = queryOptions?.queryKey ?? getListVolunteersQueryKey(params);
+
+  const queryFn: QueryFunction<Awaited<ReturnType<typeof listVolunteers>>> = ({
+    signal,
+  }) => listVolunteers(params, { signal, ...requestOptions });
+
+  return { queryKey, queryFn, ...queryOptions } as UseQueryOptions<
+    Awaited<ReturnType<typeof listVolunteers>>,
+    TError,
+    TData
+  > & { queryKey: QueryKey };
+};
+
+export type ListVolunteersQueryResult = NonNullable<
+  Awaited<ReturnType<typeof listVolunteers>>
+>;
+export type ListVolunteersQueryError = ErrorType<unknown>;
+
+/**
+ * @summary List registered volunteers
+ */
+
+export function useListVolunteers<
+  TData = Awaited<ReturnType<typeof listVolunteers>>,
+  TError = ErrorType<unknown>,
+>(
+  params?: ListVolunteersParams,
+  options?: {
+    query?: UseQueryOptions<
+      Awaited<ReturnType<typeof listVolunteers>>,
+      TError,
+      TData
+    >;
+    request?: SecondParameter<typeof customFetch>;
+  },
+): UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+  const queryOptions = getListVolunteersQueryOptions(params, options);
+
+  const query = useQuery(queryOptions) as UseQueryResult<TData, TError> & {
+    queryKey: QueryKey;
+  };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
+
+/**
+ * @summary Register as a volunteer
+ */
+export const getCreateVolunteerUrl = () => {
+  return `/api/volunteers`;
+};
+
+export const createVolunteer = async (
+  createVolunteerBody: CreateVolunteerBody,
+  options?: RequestInit,
+): Promise<Volunteer> => {
+  return customFetch<Volunteer>(getCreateVolunteerUrl(), {
+    ...options,
+    method: "POST",
+    headers: { "Content-Type": "application/json", ...options?.headers },
+    body: JSON.stringify(createVolunteerBody),
+  });
+};
+
+export const getCreateVolunteerMutationOptions = <
+  TError = ErrorType<unknown>,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof createVolunteer>>,
+    TError,
+    { data: BodyType<CreateVolunteerBody> },
+    TContext
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseMutationOptions<
+  Awaited<ReturnType<typeof createVolunteer>>,
+  TError,
+  { data: BodyType<CreateVolunteerBody> },
+  TContext
+> => {
+  const mutationKey = ["createVolunteer"];
+  const { mutation: mutationOptions, request: requestOptions } = options
+    ? options.mutation &&
+      "mutationKey" in options.mutation &&
+      options.mutation.mutationKey
+      ? options
+      : { ...options, mutation: { ...options.mutation, mutationKey } }
+    : { mutation: { mutationKey }, request: undefined };
+
+  const mutationFn: MutationFunction<
+    Awaited<ReturnType<typeof createVolunteer>>,
+    { data: BodyType<CreateVolunteerBody> }
+  > = (props) => {
+    const { data } = props ?? {};
+
+    return createVolunteer(data, requestOptions);
+  };
+
+  return { mutationFn, ...mutationOptions };
+};
+
+export type CreateVolunteerMutationResult = NonNullable<
+  Awaited<ReturnType<typeof createVolunteer>>
+>;
+export type CreateVolunteerMutationBody = BodyType<CreateVolunteerBody>;
+export type CreateVolunteerMutationError = ErrorType<unknown>;
+
+/**
+ * @summary Register as a volunteer
+ */
+export const useCreateVolunteer = <
+  TError = ErrorType<unknown>,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof createVolunteer>>,
+    TError,
+    { data: BodyType<CreateVolunteerBody> },
+    TContext
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseMutationResult<
+  Awaited<ReturnType<typeof createVolunteer>>,
+  TError,
+  { data: BodyType<CreateVolunteerBody> },
+  TContext
+> => {
+  return useMutation(getCreateVolunteerMutationOptions(options));
+};
+
+/**
+ * @summary List organization registration requests (admin)
+ */
+export const getListOrgRegistrationsUrl = (
+  params?: ListOrgRegistrationsParams,
+) => {
+  const normalizedParams = new URLSearchParams();
+
+  Object.entries(params || {}).forEach(([key, value]) => {
+    if (value !== undefined) {
+      normalizedParams.append(key, value === null ? "null" : value.toString());
+    }
+  });
+
+  const stringifiedParams = normalizedParams.toString();
+
+  return stringifiedParams.length > 0
+    ? `/api/org-registrations?${stringifiedParams}`
+    : `/api/org-registrations`;
+};
+
+export const listOrgRegistrations = async (
+  params?: ListOrgRegistrationsParams,
+  options?: RequestInit,
+): Promise<OrgRegistration[]> => {
+  return customFetch<OrgRegistration[]>(getListOrgRegistrationsUrl(params), {
+    ...options,
+    method: "GET",
+  });
+};
+
+export const getListOrgRegistrationsQueryKey = (
+  params?: ListOrgRegistrationsParams,
+) => {
+  return [`/api/org-registrations`, ...(params ? [params] : [])] as const;
+};
+
+export const getListOrgRegistrationsQueryOptions = <
+  TData = Awaited<ReturnType<typeof listOrgRegistrations>>,
+  TError = ErrorType<unknown>,
+>(
+  params?: ListOrgRegistrationsParams,
+  options?: {
+    query?: UseQueryOptions<
+      Awaited<ReturnType<typeof listOrgRegistrations>>,
+      TError,
+      TData
+    >;
+    request?: SecondParameter<typeof customFetch>;
+  },
+) => {
+  const { query: queryOptions, request: requestOptions } = options ?? {};
+
+  const queryKey =
+    queryOptions?.queryKey ?? getListOrgRegistrationsQueryKey(params);
+
+  const queryFn: QueryFunction<
+    Awaited<ReturnType<typeof listOrgRegistrations>>
+  > = ({ signal }) =>
+    listOrgRegistrations(params, { signal, ...requestOptions });
+
+  return { queryKey, queryFn, ...queryOptions } as UseQueryOptions<
+    Awaited<ReturnType<typeof listOrgRegistrations>>,
+    TError,
+    TData
+  > & { queryKey: QueryKey };
+};
+
+export type ListOrgRegistrationsQueryResult = NonNullable<
+  Awaited<ReturnType<typeof listOrgRegistrations>>
+>;
+export type ListOrgRegistrationsQueryError = ErrorType<unknown>;
+
+/**
+ * @summary List organization registration requests (admin)
+ */
+
+export function useListOrgRegistrations<
+  TData = Awaited<ReturnType<typeof listOrgRegistrations>>,
+  TError = ErrorType<unknown>,
+>(
+  params?: ListOrgRegistrationsParams,
+  options?: {
+    query?: UseQueryOptions<
+      Awaited<ReturnType<typeof listOrgRegistrations>>,
+      TError,
+      TData
+    >;
+    request?: SecondParameter<typeof customFetch>;
+  },
+): UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+  const queryOptions = getListOrgRegistrationsQueryOptions(params, options);
+
+  const query = useQuery(queryOptions) as UseQueryResult<TData, TError> & {
+    queryKey: QueryKey;
+  };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
+
+/**
+ * @summary Submit organization registration request
+ */
+export const getCreateOrgRegistrationUrl = () => {
+  return `/api/org-registrations`;
+};
+
+export const createOrgRegistration = async (
+  createOrgRegistrationBody: CreateOrgRegistrationBody,
+  options?: RequestInit,
+): Promise<OrgRegistration> => {
+  return customFetch<OrgRegistration>(getCreateOrgRegistrationUrl(), {
+    ...options,
+    method: "POST",
+    headers: { "Content-Type": "application/json", ...options?.headers },
+    body: JSON.stringify(createOrgRegistrationBody),
+  });
+};
+
+export const getCreateOrgRegistrationMutationOptions = <
+  TError = ErrorType<unknown>,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof createOrgRegistration>>,
+    TError,
+    { data: BodyType<CreateOrgRegistrationBody> },
+    TContext
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseMutationOptions<
+  Awaited<ReturnType<typeof createOrgRegistration>>,
+  TError,
+  { data: BodyType<CreateOrgRegistrationBody> },
+  TContext
+> => {
+  const mutationKey = ["createOrgRegistration"];
+  const { mutation: mutationOptions, request: requestOptions } = options
+    ? options.mutation &&
+      "mutationKey" in options.mutation &&
+      options.mutation.mutationKey
+      ? options
+      : { ...options, mutation: { ...options.mutation, mutationKey } }
+    : { mutation: { mutationKey }, request: undefined };
+
+  const mutationFn: MutationFunction<
+    Awaited<ReturnType<typeof createOrgRegistration>>,
+    { data: BodyType<CreateOrgRegistrationBody> }
+  > = (props) => {
+    const { data } = props ?? {};
+
+    return createOrgRegistration(data, requestOptions);
+  };
+
+  return { mutationFn, ...mutationOptions };
+};
+
+export type CreateOrgRegistrationMutationResult = NonNullable<
+  Awaited<ReturnType<typeof createOrgRegistration>>
+>;
+export type CreateOrgRegistrationMutationBody =
+  BodyType<CreateOrgRegistrationBody>;
+export type CreateOrgRegistrationMutationError = ErrorType<unknown>;
+
+/**
+ * @summary Submit organization registration request
+ */
+export const useCreateOrgRegistration = <
+  TError = ErrorType<unknown>,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof createOrgRegistration>>,
+    TError,
+    { data: BodyType<CreateOrgRegistrationBody> },
+    TContext
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseMutationResult<
+  Awaited<ReturnType<typeof createOrgRegistration>>,
+  TError,
+  { data: BodyType<CreateOrgRegistrationBody> },
+  TContext
+> => {
+  return useMutation(getCreateOrgRegistrationMutationOptions(options));
+};
+
+/**
+ * @summary Request a presigned URL for file upload
+ */
+export const getRequestUploadUrlUrl = () => {
+  return `/api/storage/uploads/request-url`;
+};
+
+export const requestUploadUrl = async (
+  uploadUrlRequest: UploadUrlRequest,
+  options?: RequestInit,
+): Promise<UploadUrlResponse> => {
+  return customFetch<UploadUrlResponse>(getRequestUploadUrlUrl(), {
+    ...options,
+    method: "POST",
+    headers: { "Content-Type": "application/json", ...options?.headers },
+    body: JSON.stringify(uploadUrlRequest),
+  });
+};
+
+export const getRequestUploadUrlMutationOptions = <
+  TError = ErrorType<ErrorEnvelope>,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof requestUploadUrl>>,
+    TError,
+    { data: BodyType<UploadUrlRequest> },
+    TContext
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseMutationOptions<
+  Awaited<ReturnType<typeof requestUploadUrl>>,
+  TError,
+  { data: BodyType<UploadUrlRequest> },
+  TContext
+> => {
+  const mutationKey = ["requestUploadUrl"];
+  const { mutation: mutationOptions, request: requestOptions } = options
+    ? options.mutation &&
+      "mutationKey" in options.mutation &&
+      options.mutation.mutationKey
+      ? options
+      : { ...options, mutation: { ...options.mutation, mutationKey } }
+    : { mutation: { mutationKey }, request: undefined };
+
+  const mutationFn: MutationFunction<
+    Awaited<ReturnType<typeof requestUploadUrl>>,
+    { data: BodyType<UploadUrlRequest> }
+  > = (props) => {
+    const { data } = props ?? {};
+
+    return requestUploadUrl(data, requestOptions);
+  };
+
+  return { mutationFn, ...mutationOptions };
+};
+
+export type RequestUploadUrlMutationResult = NonNullable<
+  Awaited<ReturnType<typeof requestUploadUrl>>
+>;
+export type RequestUploadUrlMutationBody = BodyType<UploadUrlRequest>;
+export type RequestUploadUrlMutationError = ErrorType<ErrorEnvelope>;
+
+/**
+ * @summary Request a presigned URL for file upload
+ */
+export const useRequestUploadUrl = <
+  TError = ErrorType<ErrorEnvelope>,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof requestUploadUrl>>,
+    TError,
+    { data: BodyType<UploadUrlRequest> },
+    TContext
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseMutationResult<
+  Awaited<ReturnType<typeof requestUploadUrl>>,
+  TError,
+  { data: BodyType<UploadUrlRequest> },
+  TContext
+> => {
+  return useMutation(getRequestUploadUrlMutationOptions(options));
+};
+
+/**
+ * @summary Serve an uploaded object
+ */
+export const getGetStorageObjectUrl = (objectPath: string) => {
+  return `/api/storage/objects/${objectPath}`;
+};
+
+export const getStorageObject = async (
+  objectPath: string,
+  options?: RequestInit,
+): Promise<Blob> => {
+  return customFetch<Blob>(getGetStorageObjectUrl(objectPath), {
+    ...options,
+    method: "GET",
+  });
+};
+
+export const getGetStorageObjectQueryKey = (objectPath: string) => {
+  return [`/api/storage/objects/${objectPath}`] as const;
+};
+
+export const getGetStorageObjectQueryOptions = <
+  TData = Awaited<ReturnType<typeof getStorageObject>>,
+  TError = ErrorType<ErrorEnvelope>,
+>(
+  objectPath: string,
+  options?: {
+    query?: UseQueryOptions<
+      Awaited<ReturnType<typeof getStorageObject>>,
+      TError,
+      TData
+    >;
+    request?: SecondParameter<typeof customFetch>;
+  },
+) => {
+  const { query: queryOptions, request: requestOptions } = options ?? {};
+
+  const queryKey =
+    queryOptions?.queryKey ?? getGetStorageObjectQueryKey(objectPath);
+
+  const queryFn: QueryFunction<
+    Awaited<ReturnType<typeof getStorageObject>>
+  > = ({ signal }) =>
+    getStorageObject(objectPath, { signal, ...requestOptions });
+
+  return {
+    queryKey,
+    queryFn,
+    enabled: !!objectPath,
+    ...queryOptions,
+  } as UseQueryOptions<
+    Awaited<ReturnType<typeof getStorageObject>>,
+    TError,
+    TData
+  > & { queryKey: QueryKey };
+};
+
+export type GetStorageObjectQueryResult = NonNullable<
+  Awaited<ReturnType<typeof getStorageObject>>
+>;
+export type GetStorageObjectQueryError = ErrorType<ErrorEnvelope>;
+
+/**
+ * @summary Serve an uploaded object
+ */
+
+export function useGetStorageObject<
+  TData = Awaited<ReturnType<typeof getStorageObject>>,
+  TError = ErrorType<ErrorEnvelope>,
+>(
+  objectPath: string,
+  options?: {
+    query?: UseQueryOptions<
+      Awaited<ReturnType<typeof getStorageObject>>,
+      TError,
+      TData
+    >;
+    request?: SecondParameter<typeof customFetch>;
+  },
+): UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+  const queryOptions = getGetStorageObjectQueryOptions(objectPath, options);
+
+  const query = useQuery(queryOptions) as UseQueryResult<TData, TError> & {
+    queryKey: QueryKey;
+  };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
+
+/**
+ * @summary Serve a public asset
+ */
+export const getGetPublicObjectUrl = (filePath: string) => {
+  return `/api/storage/public-objects/${filePath}`;
+};
+
+export const getPublicObject = async (
+  filePath: string,
+  options?: RequestInit,
+): Promise<Blob> => {
+  return customFetch<Blob>(getGetPublicObjectUrl(filePath), {
+    ...options,
+    method: "GET",
+  });
+};
+
+export const getGetPublicObjectQueryKey = (filePath: string) => {
+  return [`/api/storage/public-objects/${filePath}`] as const;
+};
+
+export const getGetPublicObjectQueryOptions = <
+  TData = Awaited<ReturnType<typeof getPublicObject>>,
+  TError = ErrorType<ErrorEnvelope>,
+>(
+  filePath: string,
+  options?: {
+    query?: UseQueryOptions<
+      Awaited<ReturnType<typeof getPublicObject>>,
+      TError,
+      TData
+    >;
+    request?: SecondParameter<typeof customFetch>;
+  },
+) => {
+  const { query: queryOptions, request: requestOptions } = options ?? {};
+
+  const queryKey =
+    queryOptions?.queryKey ?? getGetPublicObjectQueryKey(filePath);
+
+  const queryFn: QueryFunction<Awaited<ReturnType<typeof getPublicObject>>> = ({
+    signal,
+  }) => getPublicObject(filePath, { signal, ...requestOptions });
+
+  return {
+    queryKey,
+    queryFn,
+    enabled: !!filePath,
+    ...queryOptions,
+  } as UseQueryOptions<
+    Awaited<ReturnType<typeof getPublicObject>>,
+    TError,
+    TData
+  > & { queryKey: QueryKey };
+};
+
+export type GetPublicObjectQueryResult = NonNullable<
+  Awaited<ReturnType<typeof getPublicObject>>
+>;
+export type GetPublicObjectQueryError = ErrorType<ErrorEnvelope>;
+
+/**
+ * @summary Serve a public asset
+ */
+
+export function useGetPublicObject<
+  TData = Awaited<ReturnType<typeof getPublicObject>>,
+  TError = ErrorType<ErrorEnvelope>,
+>(
+  filePath: string,
+  options?: {
+    query?: UseQueryOptions<
+      Awaited<ReturnType<typeof getPublicObject>>,
+      TError,
+      TData
+    >;
+    request?: SecondParameter<typeof customFetch>;
+  },
+): UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+  const queryOptions = getGetPublicObjectQueryOptions(filePath, options);
 
   const query = useQuery(queryOptions) as UseQueryResult<TData, TError> & {
     queryKey: QueryKey;

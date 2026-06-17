@@ -123,6 +123,104 @@ export async function notifyNewHelpRequest(data: {
   }
 }
 
+export async function notifyNewDisasterReport(data: {
+  title: string;
+  description: string;
+  disasterType: string;
+  location: string;
+  district: string;
+  severity: string;
+  reporterName: string;
+  reporterPhone: string;
+  affectedCount: string | null;
+}) {
+  if (!isConfigured()) {
+    logger.info("Email not configured — skipping disaster report notification");
+    return;
+  }
+  const sevColor = data.severity === "critical" ? "#dc2626" : data.severity === "high" ? "#ea580c" : "#d97706";
+  const sevEmoji = data.severity === "critical" ? "🚨" : data.severity === "high" ? "⚠️" : "🌊";
+  try {
+    const resend = getResend();
+    await resend.emails.send({
+      from: FROM_EMAIL,
+      to: ADMIN_EMAILS,
+      subject: `${sevEmoji} Disaster Report: ${data.title} — ${data.district}`,
+      html: `
+        <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto;">
+          <div style="background: ${sevColor}; color: white; padding: 24px; border-radius: 8px 8px 0 0;">
+            <h1 style="margin: 0; font-size: 20px;">${sevEmoji} Community Disaster Report on Abhaya</h1>
+          </div>
+          <div style="background: #fff7ed; padding: 24px; border-radius: 0 0 8px 8px; border: 1px solid ${sevColor};">
+            <h2 style="margin: 0 0 16px; color: #7c2d12;">${data.title}</h2>
+            <table style="width: 100%; border-collapse: collapse;">
+              <tr><td style="padding: 8px 0; font-weight: bold; width: 40%; color: #374151;">Type</td><td style="padding: 8px 0; text-transform: capitalize;">${data.disasterType}</td></tr>
+              <tr><td style="padding: 8px 0; font-weight: bold; color: #374151;">Location</td><td style="padding: 8px 0;">${data.location}, ${data.district}</td></tr>
+              <tr><td style="padding: 8px 0; font-weight: bold; color: #374151;">Severity</td><td style="padding: 8px 0;"><span style="background: ${sevColor}; color: white; padding: 2px 10px; border-radius: 12px; font-size: 13px; text-transform: capitalize;">${data.severity}</span></td></tr>
+              ${data.affectedCount ? `<tr><td style="padding: 8px 0; font-weight: bold; color: #374151;">Affected</td><td style="padding: 8px 0;">${data.affectedCount} people</td></tr>` : ""}
+              <tr><td style="padding: 8px 0; font-weight: bold; color: #374151;">Description</td><td style="padding: 8px 0;">${data.description}</td></tr>
+              <tr><td style="padding: 8px 0; font-weight: bold; color: #374151;">Reported By</td><td style="padding: 8px 0;">${data.reporterName} — ${data.reporterPhone}</td></tr>
+            </table>
+            <div style="margin-top: 20px; padding-top: 16px; border-top: 1px solid ${sevColor};">
+              <a href="${SITE_URL}/admin" style="background: ${sevColor}; color: white; padding: 10px 20px; text-decoration: none; border-radius: 6px; font-weight: bold;">View in Admin Panel</a>
+            </div>
+          </div>
+          <p style="color: #9ca3af; font-size: 12px; text-align: center; margin-top: 16px;">Abhaya — For the people of Andhra Pradesh</p>
+        </div>
+      `,
+    });
+    logger.info({ title: data.title }, "Disaster report notification sent to admins");
+  } catch (err) {
+    logger.error({ err }, "Failed to send disaster report notification email");
+  }
+}
+
+export async function notifyNewOrgRegistration(data: {
+  name: string;
+  type: string;
+  district: string;
+  contactPerson: string;
+  email: string;
+  phone: string;
+}) {
+  if (!isConfigured()) {
+    logger.info("Email not configured — skipping org registration notification");
+    return;
+  }
+  try {
+    const resend = getResend();
+    await resend.emails.send({
+      from: FROM_EMAIL,
+      to: ADMIN_EMAILS,
+      subject: `🏢 New Organization Registration: ${data.name} — ${data.district}`,
+      html: `
+        <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto;">
+          <div style="background: #0369a1; color: white; padding: 24px; border-radius: 8px 8px 0 0;">
+            <h1 style="margin: 0; font-size: 20px;">🏢 New Organization Registration</h1>
+          </div>
+          <div style="background: #f0f9ff; padding: 24px; border-radius: 0 0 8px 8px; border: 1px solid #0ea5e9;">
+            <table style="width: 100%; border-collapse: collapse;">
+              <tr><td style="padding: 8px 0; font-weight: bold; width: 40%; color: #0c4a6e;">Organization</td><td style="padding: 8px 0; font-weight: bold;">${data.name}</td></tr>
+              <tr><td style="padding: 8px 0; font-weight: bold; color: #0c4a6e;">Type</td><td style="padding: 8px 0; text-transform: capitalize;">${data.type.replace(/_/g, " ")}</td></tr>
+              <tr><td style="padding: 8px 0; font-weight: bold; color: #0c4a6e;">District</td><td style="padding: 8px 0;">${data.district}</td></tr>
+              <tr><td style="padding: 8px 0; font-weight: bold; color: #0c4a6e;">Contact</td><td style="padding: 8px 0;">${data.contactPerson}</td></tr>
+              <tr><td style="padding: 8px 0; font-weight: bold; color: #0c4a6e;">Email</td><td style="padding: 8px 0;">${data.email}</td></tr>
+              <tr><td style="padding: 8px 0; font-weight: bold; color: #0c4a6e;">Phone</td><td style="padding: 8px 0;">${data.phone}</td></tr>
+            </table>
+            <div style="margin-top: 20px; padding-top: 16px; border-top: 1px solid #0ea5e9;">
+              <a href="${SITE_URL}/admin" style="background: #0369a1; color: white; padding: 10px 20px; text-decoration: none; border-radius: 6px; font-weight: bold;">Review in Admin Panel</a>
+            </div>
+          </div>
+          <p style="color: #9ca3af; font-size: 12px; text-align: center; margin-top: 16px;">Abhaya — For the people of Andhra Pradesh</p>
+        </div>
+      `,
+    });
+    logger.info({ name: data.name }, "Org registration notification sent to admins");
+  } catch (err) {
+    logger.error({ err }, "Failed to send org registration notification email");
+  }
+}
+
 export async function notifyNewCommunityAlert(data: {
   title: string;
   description: string;

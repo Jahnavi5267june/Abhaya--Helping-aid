@@ -1,0 +1,8 @@
+uploads = []
+generated = []
+
+[[outputs]]
+id = "EKh92HAKV5dmFt2GGm-z-"
+uri = "file://PLATFORM_GUIDE.md"
+type = "text"
+title = "Abhaya Platform — Complete Guide"

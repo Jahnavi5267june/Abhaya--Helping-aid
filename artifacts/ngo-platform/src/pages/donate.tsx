@@ -231,7 +231,7 @@ export default function Donate() {
                     </div>
                     <div className="bg-white rounded-lg p-4 border border-amber-200">
                       <p className="text-xs font-semibold text-amber-700 uppercase tracking-wide mb-1">Net Banking / NEFT</p>
-                      <p className="text-sm text-gray-700">Contact admin at<br /><span className="font-semibold">dalipartijahnavi@gmail.com</span><br />for bank details</p>
+                      <p className="text-sm text-gray-700">Contact admin at<br /><span className="font-semibold">abhayaorg@gmail.com</span><br />for bank details</p>
                     </div>
                   </div>
                   <div className="flex items-start gap-2 bg-blue-50 border border-blue-200 rounded-lg p-3">

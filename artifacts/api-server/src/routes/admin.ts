@@ -1,5 +1,5 @@
 import { Router } from "express";
-import { db, organizationsTable, donationsTable, helpRequestsTable, documentsTable, disasterReliefTable } from "@workspace/db";
+import { db, organizationsTable, donationsTable, helpRequestsTable, documentsTable, disasterReliefTable, communityAlertsTable } from "@workspace/db";
 import { eq } from "drizzle-orm";
 import { z } from "zod";
 
@@ -10,7 +10,8 @@ const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || "abhaya-admin-2024";
 router.post("/auth", (req, res) => {
   const { password } = req.body;
   if (password === ADMIN_PASSWORD) {
-    return res.json({ success: true, token: Buffer.from(ADMIN_PASSWORD).toString("base64") });
+    res.json({ success: true, token: Buffer.from(ADMIN_PASSWORD).toString("base64") });
+    return;
   }
   res.status(401).json({ error: "Invalid password" });
 });
@@ -18,7 +19,8 @@ router.post("/auth", (req, res) => {
 function requireAdmin(req: any, res: any, next: any) {
   const auth = req.headers["x-admin-token"];
   if (!auth || Buffer.from(auth as string, "base64").toString() !== ADMIN_PASSWORD) {
-    return res.status(401).json({ error: "Unauthorized" });
+    res.status(401).json({ error: "Unauthorized" });
+    return;
   }
   next();
 }
@@ -45,7 +47,7 @@ router.patch("/organizations/:id", requireAdmin, async (req, res) => {
       .where(eq(organizationsTable.id, id))
       .returning();
 
-    if (!org) return res.status(404).json({ error: "Not found" });
+    if (!org) { res.status(404).json({ error: "Not found" }); return; }
     res.json({ ...org, latitude: org.latitude ? parseFloat(org.latitude) : null, longitude: org.longitude ? parseFloat(org.longitude) : null, createdAt: org.createdAt.toISOString() });
   } catch (err) {
     req.log.error({ err }, "Failed to update organization");
@@ -63,7 +65,7 @@ router.patch("/donations/:id", requireAdmin, async (req, res) => {
       .where(eq(donationsTable.id, id))
       .returning();
 
-    if (!donation) return res.status(404).json({ error: "Not found" });
+    if (!donation) { res.status(404).json({ error: "Not found" }); return; }
     res.json({ ...donation, amount: donation.amount ? parseFloat(donation.amount) : null, createdAt: donation.createdAt.toISOString() });
   } catch (err) {
     req.log.error({ err }, "Failed to update donation");
@@ -81,7 +83,7 @@ router.patch("/help-requests/:id", requireAdmin, async (req, res) => {
       .where(eq(helpRequestsTable.id, id))
       .returning();
 
-    if (!request) return res.status(404).json({ error: "Not found" });
+    if (!request) { res.status(404).json({ error: "Not found" }); return; }
     res.json({ ...request, createdAt: request.createdAt.toISOString() });
   } catch (err) {
     req.log.error({ err }, "Failed to update help request");
@@ -99,7 +101,7 @@ router.patch("/disaster-relief/:id", requireAdmin, async (req, res) => {
       .where(eq(disasterReliefTable.id, id))
       .returning();
 
-    if (!campaign) return res.status(404).json({ error: "Not found" });
+    if (!campaign) { res.status(404).json({ error: "Not found" }); return; }
     res.json({ ...campaign, targetAmount: parseFloat(campaign.targetAmount), raisedAmount: parseFloat(campaign.raisedAmount), createdAt: campaign.createdAt.toISOString() });
   } catch (err) {
     req.log.error({ err }, "Failed to update disaster relief");
@@ -107,10 +109,27 @@ router.patch("/disaster-relief/:id", requireAdmin, async (req, res) => {
   }
 });
 
-router.delete("/organizations/:id", requireAdmin, async (req, res) => {
+router.patch("/community-alerts/:id", requireAdmin, async (req, res) => {
   try {
     const id = Number(req.params.id);
-    await db.delete(organizationsTable).where(eq(organizationsTable.id, id));
+    const { status } = z.object({ status: z.enum(["open", "fulfilled", "closed"]) }).parse(req.body);
+    const [alert] = await db
+      .update(communityAlertsTable)
+      .set({ status })
+      .where(eq(communityAlertsTable.id, id))
+      .returning();
+
+    if (!alert) { res.status(404).json({ error: "Not found" }); return; }
+    res.json({ ...alert, createdAt: alert.createdAt.toISOString() });
+  } catch (err) {
+    req.log.error({ err }, "Failed to update community alert");
+    res.status(400).json({ error: "Invalid request" });
+  }
+});
+
+router.delete("/organizations/:id", requireAdmin, async (req, res) => {
+  try {
+    await db.delete(organizationsTable).where(eq(organizationsTable.id, Number(req.params.id)));
     res.json({ success: true });
   } catch (err) {
     req.log.error({ err }, "Failed to delete organization");
@@ -120,8 +139,7 @@ router.delete("/organizations/:id", requireAdmin, async (req, res) => {
 
 router.delete("/help-requests/:id", requireAdmin, async (req, res) => {
   try {
-    const id = Number(req.params.id);
-    await db.delete(helpRequestsTable).where(eq(helpRequestsTable.id, id));
+    await db.delete(helpRequestsTable).where(eq(helpRequestsTable.id, Number(req.params.id)));
     res.json({ success: true });
   } catch (err) {
     req.log.error({ err }, "Failed to delete help request");
@@ -131,8 +149,7 @@ router.delete("/help-requests/:id", requireAdmin, async (req, res) => {
 
 router.delete("/donations/:id", requireAdmin, async (req, res) => {
   try {
-    const id = Number(req.params.id);
-    await db.delete(donationsTable).where(eq(donationsTable.id, id));
+    await db.delete(donationsTable).where(eq(donationsTable.id, Number(req.params.id)));
     res.json({ success: true });
   } catch (err) {
     req.log.error({ err }, "Failed to delete donation");
@@ -142,11 +159,20 @@ router.delete("/donations/:id", requireAdmin, async (req, res) => {
 
 router.delete("/documents/:id", requireAdmin, async (req, res) => {
   try {
-    const id = Number(req.params.id);
-    await db.delete(documentsTable).where(eq(documentsTable.id, id));
+    await db.delete(documentsTable).where(eq(documentsTable.id, Number(req.params.id)));
     res.json({ success: true });
   } catch (err) {
     req.log.error({ err }, "Failed to delete document");
+    res.status(500).json({ error: "Failed" });
+  }
+});
+
+router.delete("/community-alerts/:id", requireAdmin, async (req, res) => {
+  try {
+    await db.delete(communityAlertsTable).where(eq(communityAlertsTable.id, Number(req.params.id)));
+    res.json({ success: true });
+  } catch (err) {
+    req.log.error({ err }, "Failed to delete community alert");
     res.status(500).json({ error: "Failed" });
   }
 });

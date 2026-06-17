@@ -72,3 +72,11 @@ export async function patchDisasterRelief(id: number, body: Record<string, unkno
 export async function deleteDocument(id: number) {
   return adminFetch(`/documents/${id}`, { method: "DELETE" });
 }
+
+export async function patchCommunityAlert(id: number, status: string) {
+  return adminFetch(`/community-alerts/${id}`, { method: "PATCH", body: JSON.stringify({ status }) });
+}
+
+export async function deleteCommunityAlert(id: number) {
+  return adminFetch(`/community-alerts/${id}`, { method: "DELETE" });
+}

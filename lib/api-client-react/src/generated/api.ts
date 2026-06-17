@@ -17,7 +17,9 @@ import type {
 } from "@tanstack/react-query";
 
 import type {
+  CommunityAlert,
   ContributeBody,
+  CreateCommunityAlertBody,
   CreateDisasterReliefBody,
   CreateDocumentBody,
   CreateDonationBody,
@@ -29,6 +31,7 @@ import type {
   DonationTypeStat,
   HealthStatus,
   HelpRequest,
+  ListCommunityAlertsParams,
   ListDisasterReliefParams,
   ListDocumentsParams,
   ListDonationsParams,
@@ -1204,6 +1207,193 @@ export const useContributeToDisasterRelief = <
   TContext
 > => {
   return useMutation(getContributeToDisasterReliefMutationOptions(options));
+};
+
+/**
+ * @summary List community alerts
+ */
+export const getListCommunityAlertsUrl = (
+  params?: ListCommunityAlertsParams,
+) => {
+  const normalizedParams = new URLSearchParams();
+
+  Object.entries(params || {}).forEach(([key, value]) => {
+    if (value !== undefined) {
+      normalizedParams.append(key, value === null ? "null" : value.toString());
+    }
+  });
+
+  const stringifiedParams = normalizedParams.toString();
+
+  return stringifiedParams.length > 0
+    ? `/api/community-alerts?${stringifiedParams}`
+    : `/api/community-alerts`;
+};
+
+export const listCommunityAlerts = async (
+  params?: ListCommunityAlertsParams,
+  options?: RequestInit,
+): Promise<CommunityAlert[]> => {
+  return customFetch<CommunityAlert[]>(getListCommunityAlertsUrl(params), {
+    ...options,
+    method: "GET",
+  });
+};
+
+export const getListCommunityAlertsQueryKey = (
+  params?: ListCommunityAlertsParams,
+) => {
+  return [`/api/community-alerts`, ...(params ? [params] : [])] as const;
+};
+
+export const getListCommunityAlertsQueryOptions = <
+  TData = Awaited<ReturnType<typeof listCommunityAlerts>>,
+  TError = ErrorType<unknown>,
+>(
+  params?: ListCommunityAlertsParams,
+  options?: {
+    query?: UseQueryOptions<
+      Awaited<ReturnType<typeof listCommunityAlerts>>,
+      TError,
+      TData
+    >;
+    request?: SecondParameter<typeof customFetch>;
+  },
+) => {
+  const { query: queryOptions, request: requestOptions } = options ?? {};
+
+  const queryKey =
+    queryOptions?.queryKey ?? getListCommunityAlertsQueryKey(params);
+
+  const queryFn: QueryFunction<
+    Awaited<ReturnType<typeof listCommunityAlerts>>
+  > = ({ signal }) =>
+    listCommunityAlerts(params, { signal, ...requestOptions });
+
+  return { queryKey, queryFn, ...queryOptions } as UseQueryOptions<
+    Awaited<ReturnType<typeof listCommunityAlerts>>,
+    TError,
+    TData
+  > & { queryKey: QueryKey };
+};
+
+export type ListCommunityAlertsQueryResult = NonNullable<
+  Awaited<ReturnType<typeof listCommunityAlerts>>
+>;
+export type ListCommunityAlertsQueryError = ErrorType<unknown>;
+
+/**
+ * @summary List community alerts
+ */
+
+export function useListCommunityAlerts<
+  TData = Awaited<ReturnType<typeof listCommunityAlerts>>,
+  TError = ErrorType<unknown>,
+>(
+  params?: ListCommunityAlertsParams,
+  options?: {
+    query?: UseQueryOptions<
+      Awaited<ReturnType<typeof listCommunityAlerts>>,
+      TError,
+      TData
+    >;
+    request?: SecondParameter<typeof customFetch>;
+  },
+): UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+  const queryOptions = getListCommunityAlertsQueryOptions(params, options);
+
+  const query = useQuery(queryOptions) as UseQueryResult<TData, TError> & {
+    queryKey: QueryKey;
+  };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
+
+/**
+ * @summary Post a community alert
+ */
+export const getCreateCommunityAlertUrl = () => {
+  return `/api/community-alerts`;
+};
+
+export const createCommunityAlert = async (
+  createCommunityAlertBody: CreateCommunityAlertBody,
+  options?: RequestInit,
+): Promise<CommunityAlert> => {
+  return customFetch<CommunityAlert>(getCreateCommunityAlertUrl(), {
+    ...options,
+    method: "POST",
+    headers: { "Content-Type": "application/json", ...options?.headers },
+    body: JSON.stringify(createCommunityAlertBody),
+  });
+};
+
+export const getCreateCommunityAlertMutationOptions = <
+  TError = ErrorType<unknown>,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof createCommunityAlert>>,
+    TError,
+    { data: BodyType<CreateCommunityAlertBody> },
+    TContext
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseMutationOptions<
+  Awaited<ReturnType<typeof createCommunityAlert>>,
+  TError,
+  { data: BodyType<CreateCommunityAlertBody> },
+  TContext
+> => {
+  const mutationKey = ["createCommunityAlert"];
+  const { mutation: mutationOptions, request: requestOptions } = options
+    ? options.mutation &&
+      "mutationKey" in options.mutation &&
+      options.mutation.mutationKey
+      ? options
+      : { ...options, mutation: { ...options.mutation, mutationKey } }
+    : { mutation: { mutationKey }, request: undefined };
+
+  const mutationFn: MutationFunction<
+    Awaited<ReturnType<typeof createCommunityAlert>>,
+    { data: BodyType<CreateCommunityAlertBody> }
+  > = (props) => {
+    const { data } = props ?? {};
+
+    return createCommunityAlert(data, requestOptions);
+  };
+
+  return { mutationFn, ...mutationOptions };
+};
+
+export type CreateCommunityAlertMutationResult = NonNullable<
+  Awaited<ReturnType<typeof createCommunityAlert>>
+>;
+export type CreateCommunityAlertMutationBody =
+  BodyType<CreateCommunityAlertBody>;
+export type CreateCommunityAlertMutationError = ErrorType<unknown>;
+
+/**
+ * @summary Post a community alert
+ */
+export const useCreateCommunityAlert = <
+  TError = ErrorType<unknown>,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof createCommunityAlert>>,
+    TError,
+    { data: BodyType<CreateCommunityAlertBody> },
+    TContext
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseMutationResult<
+  Awaited<ReturnType<typeof createCommunityAlert>>,
+  TError,
+  { data: BodyType<CreateCommunityAlertBody> },
+  TContext
+> => {
+  return useMutation(getCreateCommunityAlertMutationOptions(options));
 };
 
 /**

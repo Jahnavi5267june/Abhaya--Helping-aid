@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useQueryClient } from "@tanstack/react-query";
-import { Shield, LogOut, Building2, HandHeart, HelpCircle, FileText, Siren, LayoutDashboard, CheckCircle, XCircle, Clock, AlertTriangle, Trash2, ShieldCheck, ShieldOff } from "lucide-react";
+import { Shield, LogOut, Building2, HandHeart, HelpCircle, FileText, Siren, LayoutDashboard, CheckCircle, Clock, AlertTriangle, Trash2, ShieldCheck, ShieldOff, Users } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -16,6 +16,7 @@ import {
   useListHelpRequests, getListHelpRequestsQueryKey,
   useListDocuments, getListDocumentsQueryKey,
   useListDisasterRelief, getListDisasterReliefQueryKey,
+  useListCommunityAlerts, getListCommunityAlertsQueryKey,
   useGetStatsOverview, getGetStatsOverviewQueryKey,
 } from "@workspace/api-client-react";
 import {
@@ -24,6 +25,7 @@ import {
   patchDonation, deleteDonation,
   patchHelpRequest, deleteHelpRequest,
   patchDisasterRelief, deleteDocument,
+  patchCommunityAlert, deleteCommunityAlert,
 } from "@/lib/admin-api";
 
 function LoginScreen({ onLogin }: { onLogin: () => void }) {
@@ -151,6 +153,7 @@ export default function AdminPanel() {
             <TabsTrigger value="organizations" data-testid="tab-organizations"><Building2 className="w-4 h-4 mr-1" />Organizations</TabsTrigger>
             <TabsTrigger value="donations" data-testid="tab-donations"><HandHeart className="w-4 h-4 mr-1" />Donations</TabsTrigger>
             <TabsTrigger value="help-requests" data-testid="tab-help-requests"><HelpCircle className="w-4 h-4 mr-1" />Help Requests</TabsTrigger>
+            <TabsTrigger value="community" data-testid="tab-community"><Users className="w-4 h-4 mr-1" />Community Alerts</TabsTrigger>
             <TabsTrigger value="documents" data-testid="tab-documents"><FileText className="w-4 h-4 mr-1" />Documents</TabsTrigger>
             <TabsTrigger value="disaster" data-testid="tab-disaster"><Siren className="w-4 h-4 mr-1" />Disaster Relief</TabsTrigger>
           </TabsList>
@@ -173,6 +176,11 @@ export default function AdminPanel() {
           {/* HELP REQUESTS */}
           <TabsContent value="help-requests">
             <HelpRequestsTab qc={qc} toast={toast} />
+          </TabsContent>
+
+          {/* COMMUNITY ALERTS */}
+          <TabsContent value="community">
+            <CommunityAlertsTab qc={qc} toast={toast} />
           </TabsContent>
 
           {/* DOCUMENTS */}
@@ -211,6 +219,7 @@ function OverviewTab() {
           <StatCard label="Resolved" value={s?.resolvedHelpRequests ?? 0} icon={CheckCircle} color="bg-teal-100 text-teal-700" />
           <StatCard label="Active Campaigns" value={s?.activeDisasterCampaigns ?? 0} icon={Siren} color="bg-red-100 text-red-700" />
           <StatCard label="Funds Raised" value={`₹${((s?.totalFundsRaised ?? 0) / 100000).toFixed(1)}L`} icon={HandHeart} color="bg-purple-100 text-purple-700" />
+          <StatCard label="Community Alerts" value={(s as any)?.totalCommunityAlerts ?? 0} icon={Users} color="bg-violet-100 text-violet-700" />
         </div>
       )}
     </div>
@@ -304,6 +313,115 @@ function OrganizationsTab({ qc, toast }: any) {
                       <Trash2 className="w-4 h-4" />
                     </Button>
                   </div>
+                </TableCell>
+              </TableRow>
+            ))}
+          </TableBody>
+        </Table>
+      </Card>
+    </div>
+  );
+}
+
+function CommunityAlertsTab({ qc, toast }: any) {
+  const { data: alerts, isLoading } = useListCommunityAlerts(undefined, { query: { queryKey: getListCommunityAlertsQueryKey() } });
+
+  async function changeStatus(id: number, status: string) {
+    try {
+      await patchCommunityAlert(id, status);
+      qc.invalidateQueries({ queryKey: getListCommunityAlertsQueryKey() });
+      qc.invalidateQueries({ queryKey: getGetStatsOverviewQueryKey() });
+      toast({ title: `Alert status updated to ${status}` });
+    } catch {
+      toast({ title: "Failed to update", variant: "destructive" });
+    }
+  }
+
+  async function handleDelete(id: number) {
+    if (!confirm("Delete this community alert?")) return;
+    try {
+      await deleteCommunityAlert(id);
+      qc.invalidateQueries({ queryKey: getListCommunityAlertsQueryKey() });
+      toast({ title: "Community alert deleted" });
+    } catch {
+      toast({ title: "Failed to delete", variant: "destructive" });
+    }
+  }
+
+  const urgencyBadge = (u: string) => {
+    if (u === "critical") return <Badge className="bg-red-600 text-white text-xs">🚨 Critical</Badge>;
+    if (u === "high") return <Badge className="bg-orange-500 text-white text-xs">High</Badge>;
+    if (u === "medium") return <Badge className="bg-yellow-500 text-white text-xs">Medium</Badge>;
+    return <Badge variant="outline" className="text-xs">Low</Badge>;
+  };
+
+  const CATEGORY_ICONS: Record<string, string> = {
+    hunger: "🍛", medical: "🏥", blood: "🩸", clothes: "👕", books: "📚", elderly: "👴", child: "👶", other: "🆘",
+  };
+
+  return (
+    <div className="space-y-4">
+      <div>
+        <h2 className="text-lg font-semibold">Community Alerts <span className="text-sm font-normal text-muted-foreground">({alerts?.length ?? 0})</span></h2>
+        <p className="text-sm text-muted-foreground">Alerts posted by community members about people in need. Mark as fulfilled once resolved.</p>
+      </div>
+      <Card>
+        <Table>
+          <TableHeader>
+            <TableRow>
+              <TableHead>Alert</TableHead>
+              <TableHead>Category</TableHead>
+              <TableHead>Location</TableHead>
+              <TableHead>Urgency</TableHead>
+              <TableHead>Reporter</TableHead>
+              <TableHead>Posted</TableHead>
+              <TableHead>Status</TableHead>
+              <TableHead className="w-12">Del</TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {isLoading ? (
+              Array.from({ length: 4 }).map((_, i) => (
+                <TableRow key={i}><TableCell colSpan={8}><Skeleton className="h-8 w-full" /></TableCell></TableRow>
+              ))
+            ) : alerts?.length === 0 ? (
+              <TableRow><TableCell colSpan={8} className="text-center text-muted-foreground py-8">No community alerts yet</TableCell></TableRow>
+            ) : alerts?.map((a) => (
+              <TableRow key={a.id}>
+                <TableCell>
+                  <div className="font-medium text-sm max-w-44 truncate">{a.title}</div>
+                  <div className="text-xs text-muted-foreground max-w-44 truncate">{a.description}</div>
+                </TableCell>
+                <TableCell>
+                  <span className="text-lg">{CATEGORY_ICONS[a.category ?? ""] || "🆘"}</span>
+                  <Badge variant="outline" className="text-xs ml-1 capitalize">{a.category}</Badge>
+                </TableCell>
+                <TableCell className="text-sm text-muted-foreground">
+                  <div>{a.location}</div>
+                  <div className="text-xs font-medium">{a.district}</div>
+                </TableCell>
+                <TableCell>{urgencyBadge(a.urgency ?? "")}</TableCell>
+                <TableCell>
+                  <div className="text-sm font-medium">{a.reporterName}</div>
+                  <a href={`tel:${a.reporterPhone}`} className="text-xs text-primary hover:underline">{a.reporterPhone}</a>
+                </TableCell>
+                <TableCell className="text-xs text-muted-foreground">{new Date(a.createdAt).toLocaleDateString("en-IN")}</TableCell>
+                <TableCell>
+                  <Select value={a.status ?? "open"} onValueChange={(v) => changeStatus(a.id, v)}>
+                    <SelectTrigger className="h-7 text-xs w-28">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="open">Open</SelectItem>
+                      <SelectItem value="fulfilled">Fulfilled</SelectItem>
+                      <SelectItem value="closed">Closed</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </TableCell>
+                <TableCell>
+                  <Button variant="ghost" size="icon" className="h-7 w-7 text-destructive hover:text-destructive" onClick={() => handleDelete(a.id)}>
+                    <Trash2 className="w-4 h-4" />
+                  </Button>
                 </TableCell>
               </TableRow>
             ))}

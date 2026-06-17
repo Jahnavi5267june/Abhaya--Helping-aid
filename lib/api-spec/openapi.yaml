@@ -19,6 +19,8 @@ tags:
     description: Transparency documents and verification
   - name: disaster-relief
     description: Disaster relief campaigns
+  - name: community-alerts
+    description: Community sighting alerts and local need requests
   - name: stats
     description: Platform statistics
 
@@ -111,7 +113,7 @@ paths:
           in: query
           schema:
             type: string
-            enum: [money, food, clothes, other]
+            enum: [money, food, clothes, books, medicines, other]
       responses:
         "200":
           description: List of donations
@@ -286,6 +288,52 @@ paths:
               schema:
                 $ref: "#/components/schemas/DisasterRelief"
 
+  /community-alerts:
+    get:
+      operationId: listCommunityAlerts
+      tags: [community-alerts]
+      summary: List community alerts
+      parameters:
+        - name: status
+          in: query
+          schema:
+            type: string
+            enum: [open, fulfilled, closed]
+        - name: district
+          in: query
+          schema:
+            type: string
+        - name: category
+          in: query
+          schema:
+            type: string
+      responses:
+        "200":
+          description: List of community alerts
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/CommunityAlert"
+    post:
+      operationId: createCommunityAlert
+      tags: [community-alerts]
+      summary: Post a community alert
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateCommunityAlertBody"
+      responses:
+        "201":
+          description: Community alert posted
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CommunityAlert"
+
   /stats/overview:
     get:
       operationId: getStatsOverview
@@ -404,7 +452,7 @@ components:
           type: string
         donationType:
           type: string
-          enum: [money, food, clothes, other]
+          enum: [money, food, clothes, books, medicines, other]
         amount:
           type: number
         description:
@@ -412,6 +460,8 @@ components:
         organizationId:
           type: integer
         organizationName:
+          type: string
+        paymentReference:
           type: string
         status:
           type: string
@@ -433,13 +483,15 @@ components:
           type: string
         donationType:
           type: string
-          enum: [money, food, clothes, other]
+          enum: [money, food, clothes, books, medicines, other]
         amount:
           type: number
         description:
           type: string
         organizationId:
           type: integer
+        paymentReference:
+          type: string
       required: [donorName, donorEmail, donorPhone, donationType, organizationId]
 
     HelpRequest:
@@ -459,7 +511,7 @@ components:
           type: string
         category:
           type: string
-          enum: [medical, shelter, food, education, disability_aid, elderly_care, other]
+          enum: [medical, blood_donation, shelter, food, education, disability_aid, elderly_care, other]
         description:
           type: string
         urgency:
@@ -487,7 +539,7 @@ components:
           type: string
         category:
           type: string
-          enum: [medical, shelter, food, education, disability_aid, elderly_care, other]
+          enum: [medical, blood_donation, shelter, food, education, disability_aid, elderly_care, other]
         description:
           type: string
         urgency:
@@ -607,6 +659,63 @@ components:
           type: number
       required: [donorName, donorPhone, amount]
 
+    CommunityAlert:
+      type: object
+      properties:
+        id:
+          type: integer
+        title:
+          type: string
+        description:
+          type: string
+        category:
+          type: string
+          enum: [hunger, medical, blood, clothes, books, elderly, child, other]
+        location:
+          type: string
+        district:
+          type: string
+        urgency:
+          type: string
+          enum: [low, medium, high, critical]
+        status:
+          type: string
+          enum: [open, fulfilled, closed]
+        reporterName:
+          type: string
+        reporterPhone:
+          type: string
+        reporterEmail:
+          type: string
+        createdAt:
+          type: string
+      required: [id, title, description, category, location, district, urgency, status, reporterName, reporterPhone, createdAt]
+
+    CreateCommunityAlertBody:
+      type: object
+      properties:
+        title:
+          type: string
+        description:
+          type: string
+        category:
+          type: string
+          enum: [hunger, medical, blood, clothes, books, elderly, child, other]
+        location:
+          type: string
+        district:
+          type: string
+        urgency:
+          type: string
+          enum: [low, medium, high, critical]
+        reporterName:
+          type: string
+        reporterPhone:
+          type: string
+        reporterEmail:
+          type: string
+      required: [title, description, category, location, district, urgency, reporterName, reporterPhone]
+
     StatsOverview:
       type: object
       properties:
@@ -626,7 +735,9 @@ components:
           type: number
         verifiedOrganizations:
           type: integer
-      required: [totalOrganizations, totalDonors, totalDonations, totalHelpRequests, resolvedHelpRequests, activeDisasterCampaigns, totalFundsRaised, verifiedOrganizations]
+        totalCommunityAlerts:
+          type: integer
+      required: [totalOrganizations, totalDonors, totalDonations, totalHelpRequests, resolvedHelpRequests, activeDisasterCampaigns, totalFundsRaised, verifiedOrganizations, totalCommunityAlerts]
 
     DonationTypeStat:
       type: object

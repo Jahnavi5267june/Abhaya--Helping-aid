@@ -92,7 +92,9 @@ export const GetOrganizationResponse = zod.object({
  */
 export const ListDonationsQueryParams = zod.object({
   organizationId: zod.coerce.number().optional(),
-  type: zod.enum(["money", "food", "clothes", "other"]).optional(),
+  type: zod
+    .enum(["money", "food", "clothes", "books", "medicines", "other"])
+    .optional(),
 });
 
 export const ListDonationsResponseItem = zod.object({
@@ -101,11 +103,19 @@ export const ListDonationsResponseItem = zod.object({
   donorEmail: zod.string(),
   donorPhone: zod.string(),
   donorCity: zod.string().optional(),
-  donationType: zod.enum(["money", "food", "clothes", "other"]),
+  donationType: zod.enum([
+    "money",
+    "food",
+    "clothes",
+    "books",
+    "medicines",
+    "other",
+  ]),
   amount: zod.number().optional(),
   description: zod.string().optional(),
   organizationId: zod.number(),
   organizationName: zod.string().optional(),
+  paymentReference: zod.string().optional(),
   status: zod.enum(["pending", "confirmed", "delivered"]),
   createdAt: zod.string(),
 });
@@ -119,10 +129,18 @@ export const CreateDonationBody = zod.object({
   donorEmail: zod.string(),
   donorPhone: zod.string(),
   donorCity: zod.string().optional(),
-  donationType: zod.enum(["money", "food", "clothes", "other"]),
+  donationType: zod.enum([
+    "money",
+    "food",
+    "clothes",
+    "books",
+    "medicines",
+    "other",
+  ]),
   amount: zod.number().optional(),
   description: zod.string().optional(),
   organizationId: zod.number(),
+  paymentReference: zod.string().optional(),
 });
 
 /**
@@ -142,6 +160,7 @@ export const ListHelpRequestsResponseItem = zod.object({
   district: zod.string().optional(),
   category: zod.enum([
     "medical",
+    "blood_donation",
     "shelter",
     "food",
     "education",
@@ -167,6 +186,7 @@ export const CreateHelpRequestBody = zod.object({
   district: zod.string().optional(),
   category: zod.enum([
     "medical",
+    "blood_donation",
     "shelter",
     "food",
     "education",
@@ -303,6 +323,66 @@ export const ContributeToDisasterReliefResponse = zod.object({
 });
 
 /**
+ * @summary List community alerts
+ */
+export const ListCommunityAlertsQueryParams = zod.object({
+  status: zod.enum(["open", "fulfilled", "closed"]).optional(),
+  district: zod.coerce.string().optional(),
+  category: zod.coerce.string().optional(),
+});
+
+export const ListCommunityAlertsResponseItem = zod.object({
+  id: zod.number(),
+  title: zod.string(),
+  description: zod.string(),
+  category: zod.enum([
+    "hunger",
+    "medical",
+    "blood",
+    "clothes",
+    "books",
+    "elderly",
+    "child",
+    "other",
+  ]),
+  location: zod.string(),
+  district: zod.string(),
+  urgency: zod.enum(["low", "medium", "high", "critical"]),
+  status: zod.enum(["open", "fulfilled", "closed"]),
+  reporterName: zod.string(),
+  reporterPhone: zod.string(),
+  reporterEmail: zod.string().optional(),
+  createdAt: zod.string(),
+});
+export const ListCommunityAlertsResponse = zod.array(
+  ListCommunityAlertsResponseItem,
+);
+
+/**
+ * @summary Post a community alert
+ */
+export const CreateCommunityAlertBody = zod.object({
+  title: zod.string(),
+  description: zod.string(),
+  category: zod.enum([
+    "hunger",
+    "medical",
+    "blood",
+    "clothes",
+    "books",
+    "elderly",
+    "child",
+    "other",
+  ]),
+  location: zod.string(),
+  district: zod.string(),
+  urgency: zod.enum(["low", "medium", "high", "critical"]),
+  reporterName: zod.string(),
+  reporterPhone: zod.string(),
+  reporterEmail: zod.string().optional(),
+});
+
+/**
  * @summary Get platform-wide statistics overview
  */
 export const GetStatsOverviewResponse = zod.object({
@@ -314,6 +394,7 @@ export const GetStatsOverviewResponse = zod.object({
   activeDisasterCampaigns: zod.number(),
   totalFundsRaised: zod.number(),
   verifiedOrganizations: zod.number(),
+  totalCommunityAlerts: zod.number(),
 });
 
 /**

@@ -65,6 +65,8 @@ export const DonationDonationType = {
   money: "money",
   food: "food",
   clothes: "clothes",
+  books: "books",
+  medicines: "medicines",
   other: "other",
 } as const;
 
@@ -88,6 +90,7 @@ export interface Donation {
   description?: string;
   organizationId: number;
   organizationName?: string;
+  paymentReference?: string;
   status: DonationStatus;
   createdAt: string;
 }
@@ -99,6 +102,8 @@ export const CreateDonationBodyDonationType = {
   money: "money",
   food: "food",
   clothes: "clothes",
+  books: "books",
+  medicines: "medicines",
   other: "other",
 } as const;
 
@@ -111,6 +116,7 @@ export interface CreateDonationBody {
   amount?: number;
   description?: string;
   organizationId: number;
+  paymentReference?: string;
 }
 
 export type HelpRequestCategory =
@@ -118,6 +124,7 @@ export type HelpRequestCategory =
 
 export const HelpRequestCategory = {
   medical: "medical",
+  blood_donation: "blood_donation",
   shelter: "shelter",
   food: "food",
   education: "education",
@@ -164,6 +171,7 @@ export type CreateHelpRequestBodyCategory =
 
 export const CreateHelpRequestBodyCategory = {
   medical: "medical",
+  blood_donation: "blood_donation",
   shelter: "shelter",
   food: "food",
   education: "education",
@@ -300,6 +308,90 @@ export interface ContributeBody {
   amount: number;
 }
 
+export type CommunityAlertCategory =
+  (typeof CommunityAlertCategory)[keyof typeof CommunityAlertCategory];
+
+export const CommunityAlertCategory = {
+  hunger: "hunger",
+  medical: "medical",
+  blood: "blood",
+  clothes: "clothes",
+  books: "books",
+  elderly: "elderly",
+  child: "child",
+  other: "other",
+} as const;
+
+export type CommunityAlertUrgency =
+  (typeof CommunityAlertUrgency)[keyof typeof CommunityAlertUrgency];
+
+export const CommunityAlertUrgency = {
+  low: "low",
+  medium: "medium",
+  high: "high",
+  critical: "critical",
+} as const;
+
+export type CommunityAlertStatus =
+  (typeof CommunityAlertStatus)[keyof typeof CommunityAlertStatus];
+
+export const CommunityAlertStatus = {
+  open: "open",
+  fulfilled: "fulfilled",
+  closed: "closed",
+} as const;
+
+export interface CommunityAlert {
+  id: number;
+  title: string;
+  description: string;
+  category: CommunityAlertCategory;
+  location: string;
+  district: string;
+  urgency: CommunityAlertUrgency;
+  status: CommunityAlertStatus;
+  reporterName: string;
+  reporterPhone: string;
+  reporterEmail?: string;
+  createdAt: string;
+}
+
+export type CreateCommunityAlertBodyCategory =
+  (typeof CreateCommunityAlertBodyCategory)[keyof typeof CreateCommunityAlertBodyCategory];
+
+export const CreateCommunityAlertBodyCategory = {
+  hunger: "hunger",
+  medical: "medical",
+  blood: "blood",
+  clothes: "clothes",
+  books: "books",
+  elderly: "elderly",
+  child: "child",
+  other: "other",
+} as const;
+
+export type CreateCommunityAlertBodyUrgency =
+  (typeof CreateCommunityAlertBodyUrgency)[keyof typeof CreateCommunityAlertBodyUrgency];
+
+export const CreateCommunityAlertBodyUrgency = {
+  low: "low",
+  medium: "medium",
+  high: "high",
+  critical: "critical",
+} as const;
+
+export interface CreateCommunityAlertBody {
+  title: string;
+  description: string;
+  category: CreateCommunityAlertBodyCategory;
+  location: string;
+  district: string;
+  urgency: CreateCommunityAlertBodyUrgency;
+  reporterName: string;
+  reporterPhone: string;
+  reporterEmail?: string;
+}
+
 export interface StatsOverview {
   totalOrganizations: number;
   totalDonors: number;
@@ -309,6 +401,7 @@ export interface StatsOverview {
   activeDisasterCampaigns: number;
   totalFundsRaised: number;
   verifiedOrganizations: number;
+  totalCommunityAlerts: number;
 }
 
 export interface DonationTypeStat {
@@ -343,6 +436,8 @@ export const ListDonationsType = {
   money: "money",
   food: "food",
   clothes: "clothes",
+  books: "books",
+  medicines: "medicines",
   other: "other",
 } as const;
 
@@ -387,4 +482,19 @@ export const ListDisasterReliefStatus = {
   active: "active",
   closed: "closed",
   upcoming: "upcoming",
+} as const;
+
+export type ListCommunityAlertsParams = {
+  status?: ListCommunityAlertsStatus;
+  district?: string;
+  category?: string;
+};
+
+export type ListCommunityAlertsStatus =
+  (typeof ListCommunityAlertsStatus)[keyof typeof ListCommunityAlertsStatus];
+
+export const ListCommunityAlertsStatus = {
+  open: "open",
+  fulfilled: "fulfilled",
+  closed: "closed",
 } as const;

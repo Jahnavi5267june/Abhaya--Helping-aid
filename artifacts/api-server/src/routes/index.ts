@@ -5,6 +5,7 @@ import donationsRouter from "./donations";
 import helpRequestsRouter from "./help_requests";
 import documentsRouter from "./documents";
 import disasterReliefRouter from "./disaster_relief";
+import communityAlertsRouter from "./community_alerts";
 import statsRouter from "./stats";
 import adminRouter from "./admin";
 
@@ -16,6 +17,7 @@ router.use("/donations", donationsRouter);
 router.use("/help-requests", helpRequestsRouter);
 router.use("/documents", documentsRouter);
 router.use("/disaster-relief", disasterReliefRouter);
+router.use("/community-alerts", communityAlertsRouter);
 router.use("/stats", statsRouter);
 router.use("/admin", adminRouter);
 

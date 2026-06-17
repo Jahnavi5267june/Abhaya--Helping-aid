@@ -4,12 +4,13 @@ import * as z from "zod";
 import { useCreateHelpRequest } from "@workspace/api-client-react";
 import { useToast } from "@/hooks/use-toast";
 import { useLocation } from "wouter";
-import { AlertCircle, Loader2 } from "lucide-react";
+import { AlertCircle, Loader2, Users } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage, FormDescription } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Link } from "wouter";
 import { AP_DISTRICTS, HELP_CATEGORIES, URGENCY_LEVELS } from "@/lib/constants";
 
 const helpSchema = z.object({
@@ -18,7 +19,7 @@ const helpSchema = z.object({
   email: z.string().email("Invalid email address").optional().or(z.literal("")),
   location: z.string().min(5, "Please provide a specific location or address"),
   district: z.string().min(1, "Please select a district"),
-  category: z.enum(["medical", "shelter", "food", "education", "disability_aid", "elderly_care", "other"]),
+  category: z.enum(["medical", "blood_donation", "shelter", "food", "education", "disability_aid", "elderly_care", "other"]),
   description: z.string().min(10, "Please describe the situation in detail"),
   urgency: z.enum(["low", "medium", "high", "critical"]),
 });
@@ -33,14 +34,8 @@ export default function HelpRequest() {
   const form = useForm<HelpFormValues>({
     resolver: zodResolver(helpSchema),
     defaultValues: {
-      name: "",
-      phone: "",
-      email: "",
-      location: "",
-      district: "",
-      category: "other",
-      description: "",
-      urgency: "medium",
+      name: "", phone: "", email: "", location: "", district: "",
+      category: "other", description: "", urgency: "medium",
     },
   });
 
@@ -50,8 +45,8 @@ export default function HelpRequest() {
       {
         onSuccess: () => {
           toast({
-            title: "Help Request Submitted",
-            description: "Your request has been logged. Our partner organizations will review it shortly.",
+            title: "Help Request Submitted ✅",
+            description: "Your request has been logged. Our partner organizations and admin will review it shortly.",
           });
           setLocation("/");
         },
@@ -75,181 +70,158 @@ export default function HelpRequest() {
           </div>
           <h1 className="text-4xl font-display font-bold text-foreground mb-4">Request Assistance</h1>
           <p className="text-muted-foreground text-lg">
-            If you or someone you know needs help, please fill out this form. We'll connect you with verified organizations in your district.
+            If you or someone you know needs help, fill out this form. We'll connect you with verified organizations in your district.
           </p>
+          <p className="text-sm text-muted-foreground mt-2">
+            No login required. All information is kept confidential.
+          </p>
+        </div>
+
+        {/* Community Alert Banner */}
+        <div className="bg-purple-50 border border-purple-200 rounded-xl p-4 mb-6 flex items-start gap-3">
+          <Users className="w-5 h-5 text-purple-600 mt-0.5 shrink-0" />
+          <div>
+            <p className="text-sm font-semibold text-purple-900">Seen someone in need on the street?</p>
+            <p className="text-sm text-purple-700 mt-0.5">
+              Use the{" "}
+              <Link href="/community" className="underline font-medium hover:text-purple-900">
+                Community Help Board
+              </Link>{" "}
+              to quickly post an alert for someone you've seen — beggar, abandoned elderly, hungry child, etc.
+            </p>
+          </div>
         </div>
 
         <div className="bg-card border-t-4 border-t-destructive rounded-2xl p-6 md:p-8 shadow-sm">
           <Form {...form}>
             <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
               <div className="space-y-4">
-                <h3 className="font-semibold text-lg border-b pb-2">Request Details</h3>
-                
+                <h3 className="font-semibold text-lg border-b pb-2">Type of Help Needed</h3>
+
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <FormField
-                    control={form.control}
-                    name="category"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Type of Help Needed *</FormLabel>
-                        <Select onValueChange={field.onChange} defaultValue={field.value}>
-                          <FormControl>
-                            <SelectTrigger>
-                              <SelectValue placeholder="Select category" />
-                            </SelectTrigger>
-                          </FormControl>
-                          <SelectContent>
-                            {HELP_CATEGORIES.map((c) => (
-                              <SelectItem key={c.value} value={c.value}>{c.label}</SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-
-                  <FormField
-                    control={form.control}
-                    name="urgency"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Urgency Level *</FormLabel>
-                        <Select onValueChange={field.onChange} defaultValue={field.value}>
-                          <FormControl>
-                            <SelectTrigger>
-                              <SelectValue placeholder="Select urgency" />
-                            </SelectTrigger>
-                          </FormControl>
-                          <SelectContent>
-                            {URGENCY_LEVELS.map((u) => (
-                              <SelectItem key={u.value} value={u.value}>{u.label}</SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
-                        <FormDescription className="text-xs">
-                          Choose 'Critical' only for life-threatening situations.
-                        </FormDescription>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                </div>
-
-                <FormField
-                  control={form.control}
-                  name="description"
-                  render={({ field }) => (
+                  <FormField control={form.control} name="category" render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Detailed Description *</FormLabel>
-                      <FormControl>
-                        <Textarea 
-                          placeholder="Please describe the situation, who needs help, and what specific assistance is required." 
-                          className="min-h-[120px]"
-                          {...field} 
-                        />
-                      </FormControl>
+                      <FormLabel>Category *</FormLabel>
+                      <Select onValueChange={field.onChange} defaultValue={field.value}>
+                        <FormControl>
+                          <SelectTrigger><SelectValue placeholder="Select category" /></SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          {HELP_CATEGORIES.map((c) => (
+                            <SelectItem key={c.value} value={c.value}>{c.label}</SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
                       <FormMessage />
                     </FormItem>
-                  )}
-                />
+                  )} />
+
+                  <FormField control={form.control} name="urgency" render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Urgency Level *</FormLabel>
+                      <Select onValueChange={field.onChange} defaultValue={field.value}>
+                        <FormControl>
+                          <SelectTrigger><SelectValue placeholder="Select urgency" /></SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          {URGENCY_LEVELS.map((u) => (
+                            <SelectItem key={u.value} value={u.value}>{u.label}</SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                      <FormDescription className="text-xs">
+                        Choose 'Critical' only for life-threatening situations.
+                      </FormDescription>
+                      <FormMessage />
+                    </FormItem>
+                  )} />
+                </div>
+
+                <FormField control={form.control} name="description" render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Detailed Description *</FormLabel>
+                    <FormControl>
+                      <Textarea
+                        placeholder="Describe the situation, who needs help, and what specific assistance is required (medical, blood group if applicable, books needed, etc.)"
+                        className="min-h-[120px]"
+                        {...field}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )} />
               </div>
 
               <div className="space-y-4 pt-4">
                 <h3 className="font-semibold text-lg border-b pb-2">Location</h3>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <FormField
-                    control={form.control}
-                    name="district"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>District *</FormLabel>
-                        <Select onValueChange={field.onChange} defaultValue={field.value}>
-                          <FormControl>
-                            <SelectTrigger>
-                              <SelectValue placeholder="Select district" />
-                            </SelectTrigger>
-                          </FormControl>
-                          <SelectContent>
-                            {AP_DISTRICTS.map((d) => (
-                              <SelectItem key={d} value={d}>{d}</SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                  <FormField
-                    control={form.control}
-                    name="location"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Specific Location/Address *</FormLabel>
+                  <FormField control={form.control} name="district" render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>District *</FormLabel>
+                      <Select onValueChange={field.onChange} defaultValue={field.value}>
                         <FormControl>
-                          <Input placeholder="Mandal, Village, Landmark" {...field} />
+                          <SelectTrigger><SelectValue placeholder="Select district" /></SelectTrigger>
                         </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
+                        <SelectContent>
+                          {AP_DISTRICTS.map((d) => <SelectItem key={d} value={d}>{d}</SelectItem>)}
+                        </SelectContent>
+                      </Select>
+                      <FormMessage />
+                    </FormItem>
+                  )} />
+                  <FormField control={form.control} name="location" render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Specific Location / Address *</FormLabel>
+                      <FormControl>
+                        <Input placeholder="Mandal, Village, Landmark" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )} />
                 </div>
               </div>
 
               <div className="space-y-4 pt-4">
                 <h3 className="font-semibold text-lg border-b pb-2">Contact Person</h3>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <FormField
-                    control={form.control}
-                    name="name"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Full Name *</FormLabel>
-                        <FormControl>
-                          <Input placeholder="Your Name" {...field} />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                  <FormField
-                    control={form.control}
-                    name="phone"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Phone Number *</FormLabel>
-                        <FormControl>
-                          <Input type="tel" placeholder="Mobile Number" {...field} />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                  <FormField
-                    control={form.control}
-                    name="email"
-                    render={({ field }) => (
-                      <FormItem className="md:col-span-2">
-                        <FormLabel>Email Address (Optional)</FormLabel>
-                        <FormControl>
-                          <Input type="email" placeholder="For updates on your request" {...field} />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
+                  <FormField control={form.control} name="name" render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Full Name *</FormLabel>
+                      <FormControl><Input placeholder="Your Name" {...field} /></FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )} />
+                  <FormField control={form.control} name="phone" render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Phone Number *</FormLabel>
+                      <FormControl><Input type="tel" placeholder="Mobile Number" {...field} /></FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )} />
+                  <FormField control={form.control} name="email" render={({ field }) => (
+                    <FormItem className="md:col-span-2">
+                      <FormLabel>Email Address (Optional)</FormLabel>
+                      <FormControl>
+                        <Input type="email" placeholder="For updates on your request" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )} />
                 </div>
               </div>
 
-              <Button type="submit" className="w-full text-lg h-12 bg-destructive hover:bg-destructive/90 text-destructive-foreground" disabled={createHelpRequest.isPending}>
+              <Button
+                type="submit"
+                className="w-full text-lg h-12 bg-destructive hover:bg-destructive/90 text-destructive-foreground"
+                disabled={createHelpRequest.isPending}
+              >
                 {createHelpRequest.isPending ? (
-                  <>
-                    <Loader2 className="mr-2 h-5 w-5 animate-spin" /> Submitting Request...
-                  </>
-                ) : (
-                  "Submit Help Request"
-                )}
+                  <><Loader2 className="mr-2 h-5 w-5 animate-spin" /> Submitting Request...</>
+                ) : "Submit Help Request"}
               </Button>
+              <p className="text-center text-xs text-muted-foreground">
+                No login or account required. Your request is treated with full confidentiality.
+              </p>
             </form>
           </Form>
         </div>

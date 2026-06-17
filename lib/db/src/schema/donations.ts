@@ -12,6 +12,7 @@ export const donationsTable = pgTable("donations", {
   amount: numeric("amount", { precision: 12, scale: 2 }),
   description: text("description"),
   organizationId: integer("organization_id").notNull(),
+  paymentReference: text("payment_reference"),
   status: text("status").default("pending").notNull(),
   createdAt: timestamp("created_at").defaultNow().notNull(),
 });

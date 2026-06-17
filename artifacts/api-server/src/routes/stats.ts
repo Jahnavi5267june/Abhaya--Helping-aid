@@ -1,5 +1,5 @@
 import { Router } from "express";
-import { db, organizationsTable, donationsTable, helpRequestsTable, disasterReliefTable } from "@workspace/db";
+import { db, organizationsTable, donationsTable, helpRequestsTable, disasterReliefTable, communityAlertsTable } from "@workspace/db";
 import { eq, sql, count } from "drizzle-orm";
 
 const router = Router();
@@ -32,6 +32,8 @@ router.get("/overview", async (req, res) => {
       .select({ total: sql<string>`COALESCE(SUM(raised_amount::numeric), 0)` })
       .from(disasterReliefTable);
 
+    const [communityAlertsCount] = await db.select({ count: count() }).from(communityAlertsTable);
+
     res.json({
       totalOrganizations: orgsCount.count,
       totalDonors: donorEmails.length,
@@ -41,6 +43,7 @@ router.get("/overview", async (req, res) => {
       activeDisasterCampaigns: activeDisaster.count,
       totalFundsRaised: parseFloat(fundsResult[0]?.total || "0"),
       verifiedOrganizations: verifiedCount.count,
+      totalCommunityAlerts: communityAlertsCount.count,
     });
   } catch (err) {
     req.log.error({ err }, "Failed to get stats overview");

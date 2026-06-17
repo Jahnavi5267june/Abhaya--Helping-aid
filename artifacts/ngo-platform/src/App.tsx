@@ -13,6 +13,7 @@ import HelpRequest from "@/pages/help";
 import Transparency from "@/pages/transparency";
 import DisasterRelief from "@/pages/disaster";
 import Impact from "@/pages/impact";
+import Community from "@/pages/community";
 import AdminPanel from "@/pages/admin";
 import NotFound from "@/pages/not-found";
 
@@ -33,6 +34,7 @@ function Router() {
             <Route path="/transparency" component={Transparency} />
             <Route path="/disaster" component={DisasterRelief} />
             <Route path="/impact" component={Impact} />
+            <Route path="/community" component={Community} />
             <Route component={NotFound} />
           </Switch>
         </Layout>

@@ -1,11 +1,12 @@
 import { Link, useLocation } from "wouter";
-import { Menu, Heart, X, Search, Shield, Activity, BarChart3, HelpCircle } from "lucide-react";
+import { Menu, Heart, X, Search, Shield, Activity, BarChart3, Users } from "lucide-react";
 import { useState } from "react";
 import { Button } from "./ui/button";
 
 const NAV_LINKS = [
   { href: "/", label: "Home", icon: Heart },
   { href: "/organizations", label: "Organizations", icon: Search },
+  { href: "/community", label: "Community", icon: Users },
   { href: "/disaster", label: "Disaster Relief", icon: Activity },
   { href: "/transparency", label: "Transparency", icon: Shield },
   { href: "/impact", label: "Impact", icon: BarChart3 },
@@ -27,19 +28,28 @@ export function Layout({ children }: { children: React.ReactNode }) {
           </Link>
 
           {/* Desktop Nav */}
-          <nav className="hidden md:flex items-center gap-6">
+          <nav className="hidden md:flex items-center gap-5">
             {NAV_LINKS.map((link) => (
               <Link
                 key={link.href}
                 href={link.href}
                 className={`text-sm font-medium transition-colors hover:text-primary ${
-                  location === link.href ? "text-primary" : "text-muted-foreground"
+                  link.href === "/community"
+                    ? location === link.href
+                      ? "text-purple-600 font-semibold"
+                      : "text-purple-500 hover:text-purple-700"
+                    : location === link.href
+                    ? "text-primary"
+                    : "text-muted-foreground"
                 }`}
               >
                 {link.label}
+                {link.href === "/community" && (
+                  <span className="ml-1 text-xs bg-purple-100 text-purple-700 px-1.5 py-0.5 rounded-full font-semibold">New</span>
+                )}
               </Link>
             ))}
-            <div className="flex items-center gap-3 ml-4 border-l pl-6 border-border">
+            <div className="flex items-center gap-3 ml-2 border-l pl-5 border-border">
               <Button asChild variant="outline" className="border-primary text-primary hover:bg-primary hover:text-primary-foreground">
                 <Link href="/help">Request Help</Link>
               </Button>
@@ -73,6 +83,9 @@ export function Layout({ children }: { children: React.ReactNode }) {
                 >
                   <link.icon className="w-5 h-5" />
                   {link.label}
+                  {link.href === "/community" && (
+                    <span className="text-xs bg-purple-100 text-purple-700 px-1.5 py-0.5 rounded-full font-semibold">New</span>
+                  )}
                 </Link>
               ))}
             </nav>
@@ -106,13 +119,15 @@ export function Layout({ children }: { children: React.ReactNode }) {
                 A public welfare platform serving Andhra Pradesh. Connecting donors, organizations, and people in need with trust and transparency.
               </p>
             </div>
-            
+
             <div className="space-y-4">
               <h4 className="font-semibold text-foreground">Initiatives</h4>
               <ul className="space-y-2 text-sm text-muted-foreground">
-                <li><Link href="/organizations" className="hover:text-primary transition-colors">Directory</Link></li>
+                <li><Link href="/organizations" className="hover:text-primary transition-colors">Organizations Directory</Link></li>
+                <li><Link href="/community" className="hover:text-purple-600 transition-colors">Community Help Board</Link></li>
                 <li><Link href="/disaster" className="hover:text-primary transition-colors">Disaster Relief</Link></li>
                 <li><Link href="/help" className="hover:text-primary transition-colors">Request Help</Link></li>
+                <li><Link href="/donate" className="hover:text-primary transition-colors">Donate</Link></li>
               </ul>
             </div>
 

@@ -1,0 +1,3 @@
+- [Dual admin email pattern](dual-admin-email.md) — ADMIN_EMAIL env var is comma-separated; email.ts splits it; both dalipartijahnavi@gmail.com and sontinani2478@gmail.com receive all notifications.
+- [UPI payment flow](upi-payment.md) — No Razorpay; money donations show UPI ID (VITE_UPI_ID env var, fallback "abhaya@upi") and accept paymentReference field for UPI transaction ID verification.
+- [Community alerts feature](community-alerts.md) — Full CRUD: community_alerts DB table, /api/community-alerts GET/POST routes, /community frontend page with category/district filters, admin tab; email notifications on new alert.

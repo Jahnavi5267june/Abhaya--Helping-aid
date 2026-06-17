@@ -5,6 +5,7 @@ import {
   ListDonationsQueryParams,
   CreateDonationBody,
 } from "@workspace/api-zod";
+import { notifyNewDonation } from "../lib/email.js";
 
 const router = Router();
 
@@ -62,12 +63,25 @@ router.post("/", async (req, res) => {
       .from(organizationsTable)
       .where(eq(organizationsTable.id, donation.organizationId));
 
+    const organizationName = org?.name || "";
+
     res.status(201).json({
       ...donation,
       amount: donation.amount ? parseFloat(donation.amount) : null,
-      organizationName: org?.name || "",
+      organizationName,
       createdAt: donation.createdAt.toISOString(),
     });
+
+    notifyNewDonation({
+      donorName: donation.donorName,
+      donorEmail: donation.donorEmail,
+      donorPhone: donation.donorPhone,
+      donorCity: donation.donorCity,
+      donationType: donation.donationType,
+      amount: donation.amount ? parseFloat(donation.amount) : null,
+      description: donation.description,
+      organizationName,
+    }).catch(() => {});
   } catch (err) {
     req.log.error({ err }, "Failed to create donation");
     res.status(400).json({ error: "Invalid request" });

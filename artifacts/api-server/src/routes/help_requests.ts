@@ -1,6 +1,7 @@
 import { Router } from "express";
 import { db, helpRequestsTable } from "@workspace/db";
 import { ListHelpRequestsQueryParams, CreateHelpRequestBody } from "@workspace/api-zod";
+import { notifyNewHelpRequest } from "../lib/email.js";
 
 const router = Router();
 
@@ -49,6 +50,17 @@ router.post("/", async (req, res) => {
       ...request,
       createdAt: request.createdAt.toISOString(),
     });
+
+    notifyNewHelpRequest({
+      name: request.name,
+      phone: request.phone,
+      email: request.email,
+      location: request.location,
+      district: request.district,
+      category: request.category,
+      description: request.description,
+      urgency: request.urgency,
+    }).catch(() => {});
   } catch (err) {
     req.log.error({ err }, "Failed to create help request");
     res.status(400).json({ error: "Invalid request" });

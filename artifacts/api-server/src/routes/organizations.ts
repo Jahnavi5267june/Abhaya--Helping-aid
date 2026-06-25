@@ -70,7 +70,7 @@ router.post("/", async (req, res) => {
     });
   } catch (err) {
     req.log.error({ err }, "Failed to create organization");
-    res.status(400).json({ error: "Invalid request" });
+    return res.status(400).json({ error: "Invalid request" });
   }
 });
 
@@ -94,7 +94,7 @@ router.get("/:id", async (req, res) => {
     });
   } catch (err) {
     req.log.error({ err }, "Failed to get organization");
-    res.status(400).json({ error: "Invalid request" });
+    return res.status(400).json({ error: "Invalid request" });
   }
 });
 

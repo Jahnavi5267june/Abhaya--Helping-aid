@@ -159,7 +159,7 @@ function ContributeDialog({ campaignId, title }: { campaignId: number, title: st
     defaultValues: {
       donorName: "",
       donorPhone: "",
-      amount: "",
+      amount: 0,
     },
   });
 

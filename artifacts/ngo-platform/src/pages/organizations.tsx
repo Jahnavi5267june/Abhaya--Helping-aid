@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useListOrganizations, ListOrganizationsType } from "@workspace/api-client-react";
 import { Link } from "wouter";
-import { Building, MapPin, Users, Shield, Search } from "lucide-react";
+import { Building, MapPin, Users, Shield, Search, Handshake } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
@@ -29,6 +29,27 @@ export default function Organizations() {
         <p className="text-lg text-muted-foreground">
           Discover verified old age homes and orphanages across Andhra Pradesh making a difference.
         </p>
+      </div>
+
+      {/* Partnership CTA */}
+      <div className="bg-gradient-to-r from-blue-600 to-blue-700 rounded-2xl p-6 mb-8 flex flex-col sm:flex-row items-center justify-between gap-4 text-white shadow-md">
+        <div className="flex items-center gap-4">
+          <div className="w-12 h-12 rounded-xl bg-white/20 flex items-center justify-center shrink-0">
+            <Handshake className="w-6 h-6 text-white" />
+          </div>
+          <div>
+            <h3 className="font-semibold text-lg leading-tight">Is your organization not listed?</h3>
+            <p className="text-blue-100 text-sm mt-0.5">Join the Abhaya network — register your NGO or send us a partnership request.</p>
+          </div>
+        </div>
+        <div className="flex flex-col sm:flex-row gap-3 shrink-0">
+          <Button asChild variant="outline" className="bg-white/10 border-white/30 text-white hover:bg-white/20 hover:text-white">
+            <Link href="/register-org">Register Organization</Link>
+          </Button>
+          <Button asChild className="bg-white text-blue-700 hover:bg-blue-50 font-semibold">
+            <Link href="/contact?subject=partnership">Request Tie-Up</Link>
+          </Button>
+        </div>
       </div>
 
       <div className="bg-card border rounded-xl p-4 mb-8 flex flex-col md:flex-row gap-4">

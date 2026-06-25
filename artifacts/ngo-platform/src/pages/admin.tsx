@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useQueryClient } from "@tanstack/react-query";
-import { Shield, LogOut, Building2, HandHeart, HelpCircle, FileText, Siren, LayoutDashboard, CheckCircle, Clock, AlertTriangle, Trash2, ShieldCheck, ShieldOff, Users } from "lucide-react";
+import { Shield, LogOut, Building2, HandHeart, HelpCircle, FileText, Siren, LayoutDashboard, CheckCircle, Clock, AlertTriangle, Trash2, ShieldCheck, ShieldOff, Users, Mail, Handshake } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -20,6 +20,7 @@ import {
   useListDisasterReports, getListDisasterReportsQueryKey,
   useListVolunteers, getListVolunteersQueryKey,
   useListOrgRegistrations, getListOrgRegistrationsQueryKey,
+  useListContactMessages, getListContactMessagesQueryKey,
   useGetStatsOverview, getGetStatsOverviewQueryKey,
 } from "@workspace/api-client-react";
 import {
@@ -165,6 +166,7 @@ export default function AdminPanel() {
             <TabsTrigger value="disaster-reports" data-testid="tab-disaster-reports"><AlertTriangle className="w-4 h-4 mr-1" />Disaster Reports</TabsTrigger>
             <TabsTrigger value="documents" data-testid="tab-documents"><FileText className="w-4 h-4 mr-1" />Documents</TabsTrigger>
             <TabsTrigger value="disaster" data-testid="tab-disaster"><Siren className="w-4 h-4 mr-1" />Relief Campaigns</TabsTrigger>
+            <TabsTrigger value="contact" data-testid="tab-contact"><Mail className="w-4 h-4 mr-1" />Contact</TabsTrigger>
           </TabsList>
 
           <TabsContent value="overview"><OverviewTab /></TabsContent>
@@ -177,6 +179,7 @@ export default function AdminPanel() {
           <TabsContent value="disaster-reports"><DisasterReportsTab qc={qc} toast={toast} /></TabsContent>
           <TabsContent value="documents"><DocumentsTab qc={qc} toast={toast} /></TabsContent>
           <TabsContent value="disaster"><DisasterTab qc={qc} toast={toast} /></TabsContent>
+          <TabsContent value="contact"><ContactMessagesTab /></TabsContent>
         </Tabs>
       </div>
     </div>
@@ -996,6 +999,100 @@ function DisasterTab({ qc, toast }: any) {
                 </TableRow>
               );
             })}
+          </TableBody>
+        </Table>
+      </Card>
+    </div>
+  );
+}
+
+function ContactMessagesTab() {
+  const { data: messages, isLoading } = useListContactMessages({ query: { queryKey: getListContactMessagesQueryKey() } });
+
+  const subjectLabels: Record<string, string> = {
+    general: "General Inquiry",
+    partnership: "Partnership / Tie-Up",
+    media: "Media / Press",
+    volunteer: "Volunteering",
+    donation_help: "Donation Help",
+    organization: "About an Org",
+    other: "Other",
+  };
+
+  const subjectColor: Record<string, string> = {
+    partnership: "bg-blue-100 text-blue-800",
+    media: "bg-purple-100 text-purple-800",
+    volunteer: "bg-green-100 text-green-800",
+    donation_help: "bg-amber-100 text-amber-800",
+  };
+
+  return (
+    <div className="space-y-4">
+      <div>
+        <h2 className="text-lg font-semibold flex items-center gap-2">
+          <Mail className="w-5 h-5 text-primary" />
+          Contact & Partnership Messages
+          <span className="text-sm font-normal text-muted-foreground">({messages?.length ?? 0})</span>
+        </h2>
+        <p className="text-sm text-muted-foreground">Inquiries submitted via the Contact page. Reply directly to the sender's email.</p>
+      </div>
+      <Card>
+        <Table>
+          <TableHeader>
+            <TableRow>
+              <TableHead>From</TableHead>
+              <TableHead>Subject</TableHead>
+              <TableHead>Organization</TableHead>
+              <TableHead>Message</TableHead>
+              <TableHead>Contact</TableHead>
+              <TableHead>Date</TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {isLoading ? (
+              Array.from({ length: 4 }).map((_, i) => (
+                <TableRow key={i}><TableCell colSpan={6}><Skeleton className="h-8 w-full" /></TableCell></TableRow>
+              ))
+            ) : messages?.length === 0 ? (
+              <TableRow>
+                <TableCell colSpan={6} className="text-center text-muted-foreground py-12">
+                  <Mail className="w-8 h-8 mx-auto mb-2 opacity-30" />
+                  No messages yet
+                </TableCell>
+              </TableRow>
+            ) : messages?.map((m) => (
+              <TableRow key={m.id} className={m.subject === "partnership" ? "bg-blue-50/40" : ""}>
+                <TableCell>
+                  <div className="font-medium text-sm">{m.name}</div>
+                  <a href={`mailto:${m.email}`} className="text-xs text-primary hover:underline">{m.email}</a>
+                </TableCell>
+                <TableCell>
+                  <span className={`inline-flex items-center gap-1 text-xs px-2 py-1 rounded-full font-medium ${subjectColor[m.subject] || "bg-muted text-muted-foreground"}`}>
+                    {m.subject === "partnership" && <Handshake className="w-3 h-3" />}
+                    {subjectLabels[m.subject] || m.subject}
+                  </span>
+                </TableCell>
+                <TableCell className="text-sm text-muted-foreground">{m.organization || "—"}</TableCell>
+                <TableCell>
+                  <p className="text-sm text-muted-foreground max-w-xs line-clamp-2">{m.message}</p>
+                </TableCell>
+                <TableCell>
+                  <div className="space-y-1">
+                    <a href={`mailto:${m.email}`} className="block">
+                      <Button variant="outline" size="sm" className="h-7 text-xs w-full">
+                        <Mail className="w-3 h-3 mr-1" /> Reply
+                      </Button>
+                    </a>
+                    {m.phone && (
+                      <a href={`tel:${m.phone}`} className="block text-xs text-center text-muted-foreground hover:text-primary">{m.phone}</a>
+                    )}
+                  </div>
+                </TableCell>
+                <TableCell className="text-xs text-muted-foreground whitespace-nowrap">
+                  {new Date(m.createdAt).toLocaleDateString("en-IN")}
+                </TableCell>
+              </TableRow>
+            ))}
           </TableBody>
         </Table>
       </Card>

@@ -221,6 +221,68 @@ export async function notifyNewOrgRegistration(data: {
   }
 }
 
+export async function notifyContactMessage(data: {
+  name: string;
+  email: string;
+  phone: string | null | undefined;
+  subject: string;
+  message: string;
+  organization: string | null | undefined;
+}) {
+  if (!isConfigured()) {
+    logger.info("Email not configured — skipping contact notification");
+    return;
+  }
+
+  const subjectLabels: Record<string, string> = {
+    general: "General Inquiry",
+    partnership: "Partnership / Tie-Up Request",
+    media: "Media / Press Inquiry",
+    volunteer: "Volunteering",
+    donation_help: "Donation Help",
+    organization: "About an Organization",
+    other: "Other",
+  };
+  const subjectLabel = subjectLabels[data.subject] || data.subject;
+  const isPartnership = data.subject === "partnership";
+
+  try {
+    const resend = getResend();
+    await resend.emails.send({
+      from: FROM_EMAIL,
+      to: ADMIN_EMAILS,
+      subject: `${isPartnership ? "🤝" : "✉️"} Contact: ${subjectLabel} — ${data.name}`,
+      html: `
+        <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto;">
+          <div style="background: ${isPartnership ? "#0369a1" : "#374151"}; color: white; padding: 24px; border-radius: 8px 8px 0 0;">
+            <h1 style="margin: 0; font-size: 20px;">${isPartnership ? "🤝 Partnership Request" : "✉️ Contact Message"} on Abhaya</h1>
+          </div>
+          <div style="background: ${isPartnership ? "#f0f9ff" : "#f9fafb"}; padding: 24px; border-radius: 0 0 8px 8px; border: 1px solid ${isPartnership ? "#0ea5e9" : "#d1d5db"};">
+            <table style="width: 100%; border-collapse: collapse;">
+              <tr><td style="padding: 8px 0; font-weight: bold; width: 35%; color: #374151;">From</td><td style="padding: 8px 0;">${data.name}</td></tr>
+              <tr><td style="padding: 8px 0; font-weight: bold; color: #374151;">Email</td><td style="padding: 8px 0;"><a href="mailto:${data.email}" style="color: #0369a1;">${data.email}</a></td></tr>
+              ${data.phone ? `<tr><td style="padding: 8px 0; font-weight: bold; color: #374151;">Phone</td><td style="padding: 8px 0;">${data.phone}</td></tr>` : ""}
+              ${data.organization ? `<tr><td style="padding: 8px 0; font-weight: bold; color: #374151;">Organization</td><td style="padding: 8px 0; font-weight: bold;">${data.organization}</td></tr>` : ""}
+              <tr><td style="padding: 8px 0; font-weight: bold; color: #374151;">Subject</td><td style="padding: 8px 0;"><span style="background: ${isPartnership ? "#0369a1" : "#374151"}; color: white; padding: 2px 10px; border-radius: 12px; font-size: 13px;">${subjectLabel}</span></td></tr>
+            </table>
+            <div style="margin-top: 16px; padding: 16px; background: white; border-radius: 8px; border: 1px solid ${isPartnership ? "#bae6fd" : "#e5e7eb"};">
+              <p style="margin: 0; white-space: pre-wrap; color: #1f2937; line-height: 1.6;">${data.message}</p>
+            </div>
+            <div style="margin-top: 20px; padding-top: 16px; border-top: 1px solid ${isPartnership ? "#0ea5e9" : "#d1d5db"};">
+              <a href="${SITE_URL}/admin" style="background: ${isPartnership ? "#0369a1" : "#374151"}; color: white; padding: 10px 20px; text-decoration: none; border-radius: 6px; font-weight: bold;">View in Admin Panel</a>
+              <a href="mailto:${data.email}" style="margin-left: 12px; background: white; color: ${isPartnership ? "#0369a1" : "#374151"}; padding: 10px 20px; text-decoration: none; border-radius: 6px; font-weight: bold; border: 1px solid ${isPartnership ? "#0369a1" : "#374151"};">Reply to ${data.name}</a>
+            </div>
+          </div>
+          <p style="color: #9ca3af; font-size: 12px; text-align: center; margin-top: 16px;">Abhaya — For the people of Andhra Pradesh</p>
+        </div>
+      `,
+    });
+    logger.info({ name: data.name, subject: data.subject }, "Contact message notification sent to admins");
+  } catch (err) {
+    logger.error({ err }, "Failed to send contact message notification email");
+  }
+}
+
 export async function notifyNewCommunityAlert(data: {
   title: string;
   description: string;

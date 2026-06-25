@@ -592,6 +592,27 @@ export interface CreateOrgRegistrationBody {
   documentUrl?: string;
 }
 
+export interface ContactMessage {
+  id: number;
+  name: string;
+  email: string;
+  phone?: string;
+  subject: string;
+  message: string;
+  organization?: string;
+  status: string;
+  createdAt: string;
+}
+
+export interface CreateContactMessageBody {
+  name: string;
+  email: string;
+  phone?: string;
+  subject: string;
+  message: string;
+  organization?: string;
+}
+
 export interface UploadUrlRequest {
   /** @minLength 1 */
   name: string;

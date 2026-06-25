@@ -18,6 +18,7 @@ import Community from "@/pages/community";
 import Volunteers from "@/pages/volunteers";
 import RegisterOrg from "@/pages/register-org";
 import AdminPanel from "@/pages/admin";
+import Contact from "@/pages/contact";
 import NotFound from "@/pages/not-found";
 
 const queryClient = new QueryClient();
@@ -41,6 +42,7 @@ function Router() {
             <Route path="/disaster-reports" component={DisasterReports} />
             <Route path="/volunteers" component={Volunteers} />
             <Route path="/register-org" component={RegisterOrg} />
+            <Route path="/contact" component={Contact} />
             <Route component={NotFound} />
           </Switch>
         </Layout>

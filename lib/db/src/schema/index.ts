@@ -7,3 +7,4 @@ export * from "./community_alerts";
 export * from "./disaster_reports";
 export * from "./volunteers";
 export * from "./org_registrations";
+export * from "./contact_messages";

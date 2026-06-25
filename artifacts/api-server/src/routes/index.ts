@@ -12,6 +12,7 @@ import orgRegistrationsRouter from "./org_registrations";
 import statsRouter from "./stats";
 import adminRouter from "./admin";
 import storageRouter from "./storage";
+import contactRouter from "./contact";
 
 const router: IRouter = Router();
 
@@ -28,5 +29,6 @@ router.use("/org-registrations", orgRegistrationsRouter);
 router.use("/stats", statsRouter);
 router.use("/admin", adminRouter);
 router.use(storageRouter);
+router.use("/contact", contactRouter);
 
 export default router;

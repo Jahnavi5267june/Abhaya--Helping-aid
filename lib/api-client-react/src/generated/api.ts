@@ -18,8 +18,10 @@ import type {
 
 import type {
   CommunityAlert,
+  ContactMessage,
   ContributeBody,
   CreateCommunityAlertBody,
+  CreateContactMessageBody,
   CreateDisasterReliefBody,
   CreateDisasterReportBody,
   CreateDocumentBody,
@@ -2110,6 +2112,168 @@ export const useCreateOrgRegistration = <
   TContext
 > => {
   return useMutation(getCreateOrgRegistrationMutationOptions(options));
+};
+
+/**
+ * @summary List contact messages (admin)
+ */
+export const getListContactMessagesUrl = () => {
+  return `/api/contact`;
+};
+
+export const listContactMessages = async (
+  options?: RequestInit,
+): Promise<ContactMessage[]> => {
+  return customFetch<ContactMessage[]>(getListContactMessagesUrl(), {
+    ...options,
+    method: "GET",
+  });
+};
+
+export const getListContactMessagesQueryKey = () => {
+  return [`/api/contact`] as const;
+};
+
+export const getListContactMessagesQueryOptions = <
+  TData = Awaited<ReturnType<typeof listContactMessages>>,
+  TError = ErrorType<unknown>,
+>(options?: {
+  query?: UseQueryOptions<
+    Awaited<ReturnType<typeof listContactMessages>>,
+    TError,
+    TData
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}) => {
+  const { query: queryOptions, request: requestOptions } = options ?? {};
+
+  const queryKey = queryOptions?.queryKey ?? getListContactMessagesQueryKey();
+
+  const queryFn: QueryFunction<
+    Awaited<ReturnType<typeof listContactMessages>>
+  > = ({ signal }) => listContactMessages({ signal, ...requestOptions });
+
+  return { queryKey, queryFn, ...queryOptions } as UseQueryOptions<
+    Awaited<ReturnType<typeof listContactMessages>>,
+    TError,
+    TData
+  > & { queryKey: QueryKey };
+};
+
+export type ListContactMessagesQueryResult = NonNullable<
+  Awaited<ReturnType<typeof listContactMessages>>
+>;
+export type ListContactMessagesQueryError = ErrorType<unknown>;
+
+/**
+ * @summary List contact messages (admin)
+ */
+
+export function useListContactMessages<
+  TData = Awaited<ReturnType<typeof listContactMessages>>,
+  TError = ErrorType<unknown>,
+>(options?: {
+  query?: UseQueryOptions<
+    Awaited<ReturnType<typeof listContactMessages>>,
+    TError,
+    TData
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+  const queryOptions = getListContactMessagesQueryOptions(options);
+
+  const query = useQuery(queryOptions) as UseQueryResult<TData, TError> & {
+    queryKey: QueryKey;
+  };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
+
+/**
+ * @summary Submit a contact or partnership inquiry
+ */
+export const getCreateContactMessageUrl = () => {
+  return `/api/contact`;
+};
+
+export const createContactMessage = async (
+  createContactMessageBody: CreateContactMessageBody,
+  options?: RequestInit,
+): Promise<ContactMessage> => {
+  return customFetch<ContactMessage>(getCreateContactMessageUrl(), {
+    ...options,
+    method: "POST",
+    headers: { "Content-Type": "application/json", ...options?.headers },
+    body: JSON.stringify(createContactMessageBody),
+  });
+};
+
+export const getCreateContactMessageMutationOptions = <
+  TError = ErrorType<ErrorEnvelope>,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof createContactMessage>>,
+    TError,
+    { data: BodyType<CreateContactMessageBody> },
+    TContext
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseMutationOptions<
+  Awaited<ReturnType<typeof createContactMessage>>,
+  TError,
+  { data: BodyType<CreateContactMessageBody> },
+  TContext
+> => {
+  const mutationKey = ["createContactMessage"];
+  const { mutation: mutationOptions, request: requestOptions } = options
+    ? options.mutation &&
+      "mutationKey" in options.mutation &&
+      options.mutation.mutationKey
+      ? options
+      : { ...options, mutation: { ...options.mutation, mutationKey } }
+    : { mutation: { mutationKey }, request: undefined };
+
+  const mutationFn: MutationFunction<
+    Awaited<ReturnType<typeof createContactMessage>>,
+    { data: BodyType<CreateContactMessageBody> }
+  > = (props) => {
+    const { data } = props ?? {};
+
+    return createContactMessage(data, requestOptions);
+  };
+
+  return { mutationFn, ...mutationOptions };
+};
+
+export type CreateContactMessageMutationResult = NonNullable<
+  Awaited<ReturnType<typeof createContactMessage>>
+>;
+export type CreateContactMessageMutationBody =
+  BodyType<CreateContactMessageBody>;
+export type CreateContactMessageMutationError = ErrorType<ErrorEnvelope>;
+
+/**
+ * @summary Submit a contact or partnership inquiry
+ */
+export const useCreateContactMessage = <
+  TError = ErrorType<ErrorEnvelope>,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof createContactMessage>>,
+    TError,
+    { data: BodyType<CreateContactMessageBody> },
+    TContext
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseMutationResult<
+  Awaited<ReturnType<typeof createContactMessage>>,
+  TError,
+  { data: BodyType<CreateContactMessageBody> },
+  TContext
+> => {
+  return useMutation(getCreateContactMessageMutationOptions(options));
 };
 
 /**

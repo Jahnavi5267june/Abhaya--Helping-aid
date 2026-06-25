@@ -1,5 +1,5 @@
 import { Link, useLocation } from "wouter";
-import { Menu, Heart, X, Search, Shield, Activity, BarChart3, Users } from "lucide-react";
+import { Menu, Heart, X, Search, Shield, Activity, BarChart3, Users, Mail } from "lucide-react";
 import { useState } from "react";
 import { Button } from "./ui/button";
 
@@ -11,6 +11,7 @@ const NAV_LINKS = [
   { href: "/volunteers", label: "Volunteers", icon: Users },
   { href: "/transparency", label: "Transparency", icon: Shield },
   { href: "/impact", label: "Impact", icon: BarChart3 },
+  { href: "/contact", label: "Contact", icon: Mail },
 ];
 
 export function Layout({ children }: { children: React.ReactNode }) {
@@ -140,6 +141,8 @@ export function Layout({ children }: { children: React.ReactNode }) {
               <ul className="space-y-2 text-sm text-muted-foreground">
                 <li><Link href="/impact" className="hover:text-primary transition-colors">Our Impact</Link></li>
                 <li><Link href="/transparency" className="hover:text-primary transition-colors">Transparency</Link></li>
+                <li><Link href="/contact" className="hover:text-primary transition-colors">Contact Us</Link></li>
+                <li><Link href="/contact?subject=partnership" className="hover:text-blue-600 transition-colors">Partner with Abhaya</Link></li>
                 <li><Link href="/admin" className="hover:text-primary transition-colors">Admin Login</Link></li>
               </ul>
             </div>

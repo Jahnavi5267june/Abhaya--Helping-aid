@@ -560,6 +560,36 @@ export const CreateOrgRegistrationBody = zod.object({
 });
 
 /**
+ * @summary List contact messages (admin)
+ */
+export const ListContactMessagesResponseItem = zod.object({
+  id: zod.number(),
+  name: zod.string(),
+  email: zod.string(),
+  phone: zod.string().optional(),
+  subject: zod.string(),
+  message: zod.string(),
+  organization: zod.string().optional(),
+  status: zod.string(),
+  createdAt: zod.string(),
+});
+export const ListContactMessagesResponse = zod.array(
+  ListContactMessagesResponseItem,
+);
+
+/**
+ * @summary Submit a contact or partnership inquiry
+ */
+export const CreateContactMessageBody = zod.object({
+  name: zod.string(),
+  email: zod.string(),
+  phone: zod.string().optional(),
+  subject: zod.string(),
+  message: zod.string(),
+  organization: zod.string().optional(),
+});
+
+/**
  * @summary Request a presigned URL for file upload
  */
 

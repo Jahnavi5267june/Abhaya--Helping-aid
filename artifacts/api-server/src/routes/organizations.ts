@@ -46,6 +46,7 @@ router.get("/", async (req, res) => {
   } catch (err) {
     req.log.error({ err }, "Failed to list organizations");
     res.status(400).json({ error: "Invalid request" });
+    return;
   }
 });
 
@@ -70,7 +71,8 @@ router.post("/", async (req, res) => {
     });
   } catch (err) {
     req.log.error({ err }, "Failed to create organization");
-    return res.status(400).json({ error: "Invalid request" });
+    res.status(400).json({ error: "Invalid request" });
+    return;
   }
 });
 
@@ -83,7 +85,8 @@ router.get("/:id", async (req, res) => {
       .where(eq(organizationsTable.id, params.id));
 
     if (!org) {
-      return res.status(404).json({ error: "Organization not found" });
+        res.status(404).json({ error: "Organization not found" });
+        return;
     }
 
     res.json({
@@ -94,7 +97,8 @@ router.get("/:id", async (req, res) => {
     });
   } catch (err) {
     req.log.error({ err }, "Failed to get organization");
-    return res.status(400).json({ error: "Invalid request" });
+    res.status(400).json({ error: "Invalid request" });
+    return;
   }
 });
 

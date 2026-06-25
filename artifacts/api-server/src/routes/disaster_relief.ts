@@ -38,7 +38,8 @@ router.get("/", async (req, res) => {
     res.json(result);
   } catch (err) {
     req.log.error({ err }, "Failed to list disaster relief campaigns");
-    return res.status(400).json({ error: "Invalid request" });
+    res.status(400).json({ error: "Invalid request" });
+    return;
   }
 });
 
@@ -67,7 +68,8 @@ router.post("/", async (req, res) => {
     });
   } catch (err) {
     req.log.error({ err }, "Failed to create disaster relief campaign");
-    return res.status(400).json({ error: "Invalid request" });
+    res.status(400).json({ error: "Invalid request" });
+    return;
   }
 });
 
@@ -89,7 +91,8 @@ router.post("/:id/contribute", async (req, res) => {
       .where(eq(disasterReliefTable.id, params.id));
 
     if (!campaign) {
-      return res.status(404).json({ error: "Campaign not found" });
+      res.status(404).json({ error: "Campaign not found" });
+      return;
     }
 
     res.json({
@@ -102,7 +105,8 @@ router.post("/:id/contribute", async (req, res) => {
     });
   } catch (err) {
     req.log.error({ err }, "Failed to contribute to disaster relief");
-    return res.status(400).json({ error: "Invalid request" });
+    res.status(400).json({ error: "Invalid request" });
+    return;
   }
 });
 

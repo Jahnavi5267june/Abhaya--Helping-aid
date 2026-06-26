@@ -7,6 +7,7 @@ import pinoHttp from "pino-http";
 import router from "./routes";
 import { logger } from "./lib/logger";
 
+
 const app: Express = express();
 
 const __filename = fileURLToPath(import.meta.url);

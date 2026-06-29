@@ -33,8 +33,9 @@ const clientPath = path.resolve(
 
 app.use(express.static(clientPath));
 
-app.get("*", (_req, res) => {
+app.get("/{*path}", (_req, res) => {
   res.sendFile(path.join(clientPath, "index.html"));
 });
+
 
 export default app;
